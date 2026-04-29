@@ -1,0 +1,20 @@
+<main>
+  <h1>Search Study Sessions</h1>
+
+  <input type="text" id="searchCourse" placeholder="course">
+  <input type="text" id="searchTopic" placeholder="topic">
+  <button onclick="searchSessions()">Search</button>
+
+  <ul id="results"></ul>
+
+  <h2>Join Session</h2>
+  <input type="text" id="joinSessionId" placeholder="sessionId">
+  <input type="text" id="joinUserId" placeholder="userId">
+  <button onclick="joinSession()">Join</button>
+
+  <p id="joinResult"></p>
+
+  <a href="/sessions/create">Go to Create</a>
+
+  <script src="/public/js/search.js"></script>
+</main>

@@ -1,17 +1,13 @@
-const authRoutes = require('./auth_routes');
-const spotRoutes = require('./spots');
-const reportRoutes = require('./reports');
-const sessionRoutes = require('./sessions');
+import authRoutes from './auth_routes.js';
+import sessionsRoutes from './sessions.js';
 
 const constructorMethod = (app) => {
-  app.use('/auth', authRoutes);
-  app.use('/spots', spotRoutes);
-  app.use('/reports', reportRoutes);
-  app.use('/sessions', sessionRoutes);
+  app.use('/', authRoutes);
+  app.use('/sessions', sessionsRoutes);
 
-  app.use('*', (req, res) => {
-    res.status(404).render('error');
+  app.use((req, res) => {
+    res.status(404).render('error', { error: 'Page not found' });
   });
 };
 
-module.exports = constructorMethod;
+export default constructorMethod;
