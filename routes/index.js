@@ -1,13 +1,11 @@
-const authRoutes = require('./auth_routes.js');
-const spotRoutes = require('./spots.js');
-const reportRoutes = require('./reports.js');
-const sessionRoutes = require('./sessions.js');
+import authRoutes = from './auth_routes.js';
+import spotRoutes = from './spots.js';
+import reportRoutes = from './reports.js';
+import sessionRoutes = from './sessions.js';
 
 const constructorMethod = (app) => {
-  app.use('/auth', authRoutes);
-  app.use('/spots', spotRoutes);
-  app.use('/reports', reportRoutes);
-  app.use('/sessions', sessionRoutes);
+  app.use('/', authRoutes);
+  app.use('/sessions', sessionsRoutes);
 
   app.use('*', (req, res) => {
     res.status(404).render('error', {
@@ -17,4 +15,4 @@ const constructorMethod = (app) => {
   });
 };
 
-module.exports = constructorMethod;
+export default constructorMethod;
