@@ -1,0 +1,22 @@
+body { font-family: Arial, sans-serif; margin: 0; background: #f7f7f7; color: #222; }
+a { color: #2457a6; text-decoration: none; }
+.site-header { background: white; border-bottom: 1px solid #ddd; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+.site-header h1 { margin: 0; font-size: 24px; }
+.site-header nav { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.container { max-width: 1000px; margin: 24px auto; padding: 0 16px; }
+.hero, .detail-card, .card, table, .spot-form, .filter-form { background: white; border: 1px solid #ddd; border-radius: 8px; padding: 18px; margin-bottom: 16px; }
+.card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.button, button { background: #2457a6; color: white; border: 0; padding: 8px 12px; border-radius: 6px; cursor: pointer; display: inline-block; }
+.button.secondary { background: #555; }
+.error { color: #b00020; font-weight: bold; }
+.spot-form, .filter-form { display: grid; gap: 12px; }
+.spot-form label { display: grid; gap: 4px; }
+input, select, textarea { padding: 8px; border: 1px solid #bbb; border-radius: 5px; font: inherit; }
+textarea { min-height: 90px; }
+table { width: 100%; border-collapse: collapse; }
+th, td { border-bottom: 1px solid #ddd; padding: 10px; text-align: left; }
+.inline-form { display: inline; }
+.inline-form button { padding: 4px 8px; margin-left: 8px; }
+.badge { font-size: 13px; background: #eee; border-radius: 4px; padding: 3px 6px; }
+.review-form { margin-top: 8px; display: flex; gap: 8px; }
+.nav-user { color: #555; }

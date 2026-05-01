@@ -1,0 +1,38 @@
+<h2>Study Spots</h2>
+<form method="GET" action="/spots" class="filter-form">
+  <input type="text" name="q" placeholder="Search by name, city, or address" value="{{q}}">
+  <select name="category">
+    <option value="">All categories</option>
+    <option value="Library">Library</option>
+    <option value="Cafe">Cafe</option>
+    <option value="Study Room">Study Room</option>
+    <option value="Campus Building">Campus Building</option>
+    <option value="Other">Other</option>
+  </select>
+  <select name="openStatus">
+    <option value="">Any open status</option>
+    <option value="Open">Open</option>
+    <option value="Closed">Closed</option>
+    <option value="Temporarily Closed">Temporarily Closed</option>
+    <option value="Unknown">Unknown</option>
+  </select>
+  <label><input type="checkbox" name="wifiAvailable" value="true" {{#if wifiChecked}}checked{{/if}}> WiFi</label>
+  <label><input type="checkbox" name="outletsAvailable" value="true" {{#if outletsChecked}}checked{{/if}}> Outlets</label>
+  <button type="submit">Search</button>
+</form>
+
+{{#if spots.length}}
+  <div class="card-grid">
+    {{#each spots}}
+      <article class="card">
+        <h3><a href="/spots/{{_id}}">{{name}}</a></h3>
+        <p>{{category}} · {{boroughOrCity}}, {{state}}</p>
+        <p>{{description}}</p>
+        <p>Rating: {{averageRating}} / 5</p>
+        <p>WiFi: {{#if wifiAvailable}}Yes{{else}}No{{/if}} · Outlets: {{#if outletsAvailable}}Yes{{else}}No{{/if}} · Status: {{openStatus}}</p>
+      </article>
+    {{/each}}
+  </div>
+{{else}}
+  <p>No study spots found.</p>
+{{/if}}

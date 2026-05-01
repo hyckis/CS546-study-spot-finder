@@ -1,0 +1,32 @@
+<h2>Suggest a Study Spot</h2>
+{{#if error}}<p class="error">{{error}}</p>{{/if}}
+<form method="POST" action="/spots/suggest" class="spot-form">
+  <label>Name <input type="text" name="name" value="{{form.name}}" required></label>
+  <label>Category
+    <select name="category" required>
+      <option value="Library">Library</option>
+      <option value="Cafe">Cafe</option>
+      <option value="Study Room">Study Room</option>
+      <option value="Campus Building">Campus Building</option>
+      <option value="Other">Other</option>
+    </select>
+  </label>
+  <label>Address <input type="text" name="address" value="{{form.address}}" required></label>
+  <label>City/Borough <input type="text" name="boroughOrCity" value="{{form.boroughOrCity}}" required></label>
+  <label>State <input type="text" name="state" value="{{form.state}}" required></label>
+  <label>ZIP Code <input type="text" name="zipCode" value="{{form.zipCode}}" required></label>
+  <label>Latitude <input type="number" step="any" name="latitude" value="{{form.latitude}}"></label>
+  <label>Longitude <input type="number" step="any" name="longitude" value="{{form.longitude}}"></label>
+  <label><input type="checkbox" name="wifiAvailable" value="true"> WiFi available</label>
+  <label><input type="checkbox" name="outletsAvailable" value="true"> Outlets available</label>
+  <label>Open Status
+    <select name="openStatus">
+      <option value="Unknown">Unknown</option>
+      <option value="Open">Open</option>
+      <option value="Closed">Closed</option>
+      <option value="Temporarily Closed">Temporarily Closed</option>
+    </select>
+  </label>
+  <label>Description <textarea name="description" required>{{form.description}}</textarea></label>
+  <button type="submit">Submit Suggestion</button>
+</form>

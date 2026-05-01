@@ -1,5 +1,5 @@
 import { Router } from 'express';
-const router = Router();
+import User from '../models/User.js';
 
 import {
   createSession,
@@ -9,6 +9,26 @@ import {
   searchSessions,
   matchSessions
 } from '../data/sessions.js';
+
+const router = Router();
+
+router.get("/current", async (req, res) => {
+  if (!req.session || !req.session.userId) {
+    return res.status(401).json({ error: "Not logged in." });
+  }
+
+  try {
+    const user = await User.findById(req.session.userId).select("-passwordHash");
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    return res.json(user);
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
 
 router
   .route('/create')

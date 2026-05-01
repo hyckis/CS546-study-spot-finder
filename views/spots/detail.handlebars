@@ -1,0 +1,19 @@
+<article class="detail-card">
+  <h2>{{spot.name}}</h2>
+  <p><strong>Category:</strong> {{spot.category}}</p>
+  <p><strong>Address:</strong> {{spot.address}}, {{spot.boroughOrCity}}, {{spot.state}} {{spot.zipCode}}</p>
+  <p><strong>Description:</strong> {{spot.description}}</p>
+  <p><strong>Average Rating:</strong> {{spot.averageRating}} / 5</p>
+  <p><strong>WiFi Available:</strong> {{#if spot.wifiAvailable}}Yes{{else}}No{{/if}}</p>
+  <p><strong>Outlets Available:</strong> {{#if spot.outletsAvailable}}Yes{{else}}No{{/if}}</p>
+  <p><strong>Open Status:</strong> {{spot.openStatus}}</p>
+  <p><strong>Source:</strong> {{spot.sourceType}}</p>
+  <p><strong>Coordinates:</strong> {{spot.coordinates.latitude}}, {{spot.coordinates.longitude}}</p>
+</article>
+
+{{#if isAdmin}}
+  <p>
+    <a class="button" href="/admin/spots/{{spot._id}}/edit">Edit This Spot</a>
+  </p>
+{{/if}}
+<p><a href="/spots">Back to study spots</a></p>
