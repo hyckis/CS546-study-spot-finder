@@ -13,10 +13,9 @@ By combining open datasets with user-generated reports, the platform provides up
 The goal of this project is to make it easier for students to quickly locate suitable study environments and spend more time studying instead of searching for a place to work.
 
 Dataset from NYC open data:
-https://data.cityofnewyork.us/City-Government/NYC-Wi-Fi-Hotspot-Locations/yjub-udmw/about_data 
-https://data.cityofnewyork.us/d/ji82-xba5 
+https://data.cityofnewyork.us/City-Government/NYC-Wi-Fi-Hotspot-Locations/yjub-udmw/about_data
+https://data.cityofnewyork.us/d/ji82-xba5
 https://data.cityofnewyork.us/Health/DOHMH-New-York-City-Restaurant-Inspection-Results/43nn-pn8j/about_data
-
 
 Core Features:
 Study Spot Management System
@@ -44,9 +43,9 @@ Recent reports
 
 Rating and Real-Time Reporting System
 Users can submit ratings, comments, and short-term real-time reports using a form.
-Short-term real-time reports are managed within a defined time window. 
+Short-term real-time reports are managed within a defined time window.
 For example, a report may stay active for 90 minutes before it expires.
-Short-term real-time reports will be shown in aggregated status. 
+Short-term real-time reports will be shown in aggregated status.
 Real-time Wi-fi status include:
 “Fast”
 “Moderately Fast”
@@ -55,8 +54,8 @@ Real-time socket status include:
 “Enough”
 “Moderately Enough”
 “Full”
-Real-time spot status include: 
-“Quiet” 
+Real-time spot status include:
+“Quiet”
 “Moderately busy”
 “Crowded”
 “Full”
@@ -66,7 +65,7 @@ Users can create new study sessions at specific study spots.
 A new study session created should include:
 The study spot
 Course
-Topic 
+Topic
 Time
 Group size
 Users can search for study sessions using the session details.
@@ -87,7 +86,6 @@ Based on users’ current location, display nearby study spots using a map view 
 
 Spot closure/Issue Report System
 Users can report if a study spot is temporarily closed, under maintenance, or unsuitable for studying, and administrators can review and update the spot status.
-
 
 Core Features:
 ● Landing Page
@@ -147,7 +145,6 @@ After users enter their major in their profile, the system will allow users to:
 Find other users with the same major
 Connect with students who want to study together
 
-
 CRUD
 C
 New user
@@ -170,39 +167,38 @@ D
 Delete user profile
 Delete comments
 
-
 DB Structure:
 Users
-The users collection stores all registered users of the application, including “user” and “admin”. 
+The users collection stores all registered users of the application, including “user” and “admin”.
 Users can create accounts, log in, save favorite spots, create/join study sessions, and submit reviews/reports. Admins can also view/confirm/reject the users’ reports.
 
 Sample Document
 {
-  "_id": "1",
-  "firstName": "Wanli",
-  "lastName": "Yang",
-  "email": "wanliyang@example.com",
-  "hashedPassword": "123",
-  "major": "Computer Science",
-  "role": "user",
-  "favoriteSpotIds": [
-	"1",
-	"2"
-  ],
-  "createdSessionIds": [
-	"1"
-  ],
-  "joinedSessionIds": [
-	"1"
-  ],
-  "createdAt": "1/1/2026"
+"\_id": "1",
+"firstName": "Wanli",
+"lastName": "Yang",
+"email": "wanliyang@example.com",
+"hashedPassword": "123",
+"major": "Computer Science",
+"role": "user",
+"favoriteSpotIds": [
+"1",
+"2"
+],
+"createdSessionIds": [
+"1"
+],
+"joinedSessionIds": [
+"1"
+],
+"createdAt": "1/1/2026"
 }
 
 Field Table
 Field Name
 Field Type
 Description
-_id
+\_id
 string/ObjectId
 Unique identifier for the user
 firstName
@@ -242,39 +238,38 @@ reviewedSpotIds
 array
 (ADMIN ONLY) Array of spot ids the admin has approved or rejected
 
-
 studySpots
 The studySpots collection stores all study spots stored in the system. The spots come from the public dataset/admin’s manual creation/users’ suggestion after admin’s approval. Each study spot contains basic location and study-related information. Availability information suggested by the users will also be contained after approved by the admin.
 
 Sample Document
 {
-  "_id": "1",
-  "name": "Hoboken Public Library",
-  "category": "Library",
-  "address": "500 Park Ave, Hoboken, NJ",
-  "boroughOrCity": "Hoboken",
-  "state": "NJ",
-  "zipCode": "07030",
-  "coordinates": {
-	"latitude": 40.7448,
-	"longitude": -74.0324
-  },
-  "wifiAvailable": true,
-  "outletsAvailable": true,
-  "openStatus": "Open",
-  "description": "Quiet public library with reliable WiFi and many tables.",
-  "averageRating": 4.5,
-  "sourceType": "dataset",
-  "approved": true,
-  "reviewedBy": null,
-  "reviewNotes": "",
-  "createdBy": "admin",
-  "createdAt": "1/1/2026"
+"\_id": "1",
+"name": "Hoboken Public Library",
+"category": "Library",
+"address": "500 Park Ave, Hoboken, NJ",
+"boroughOrCity": "Hoboken",
+"state": "NJ",
+"zipCode": "07030",
+"coordinates": {
+"latitude": 40.7448,
+"longitude": -74.0324
+},
+"wifiAvailable": true,
+"outletsAvailable": true,
+"openStatus": "Open",
+"description": "Quiet public library with reliable WiFi and many tables.",
+"averageRating": 4.5,
+"sourceType": "dataset",
+"approved": true,
+"reviewedBy": null,
+"reviewNotes": "",
+"createdBy": "admin",
+"createdAt": "1/1/2026"
 }
 Coordinates (subdocument; not stored in a collection)
 {
-  "latitude": 40.7448,
-  "longitude": -74.0324
+"latitude": 40.7448,
+"longitude": -74.0324
 }
 Field Name
 Field Type
@@ -286,12 +281,11 @@ longitude
 number
 Longitude of the study spot
 
-
 Field Table
 Field Name
 Field Type
 Description
-_id
+\_id
 string/ObjectId
 Unique identifier for the study spot
 name
@@ -349,24 +343,23 @@ createdAt
 date
 Date and time when the spot was added
 
-
 Reviews
 The reviews collection stores users’ ratings and comments for each study spot. Each review belongs to one user and one study spot.
 Sample Document
 {
-  "_id": "1",
-  "userId": "1",
-  "spotId": "1",
-  "rating": 5,
-  "comment": "Very quiet and the WiFi was stable during the afternoon.",
-  "createdAt": "1/1/2026"
+"\_id": "1",
+"userId": "1",
+"spotId": "1",
+"rating": 5,
+"comment": "Very quiet and the WiFi was stable during the afternoon.",
+"createdAt": "1/1/2026"
 }
 
 Field Table
 Field Name
 Field Type
 Description
-_id
+\_id
 string/ObjectId
 Unique identifier for the review
 userId
@@ -385,30 +378,28 @@ createdAt
 date
 Date and time when the review was submitted
 
-
 Reports
 The reports collection stores immediate real-time reports for the study spots, such as WiFi speed/outlet availability/crowdedness/closure/other issues. Each report belongs to one user and one spot. Other than closure reports, the reports stay active for a limited period of time.
 Sample Document
 {
-  "_id": "1",
-  "spotId": "1",
-  "userId": "1",
-  "wifiStatus": "Fast",
-  "socketStatus": "Enough",
-  "crowdednessStatus": "Quiet",
-  "expiresAt": "2/1/2026",
-  "createdAt": "1/1/2026",
-  "type": "status",
-  "status": "approved",
-  "approvedBy": "1”
+"\_id": "1",
+"spotId": "1",
+"userId": "1",
+"wifiStatus": "Fast",
+"socketStatus": "Enough",
+"crowdednessStatus": "Quiet",
+"expiresAt": "2/1/2026",
+"createdAt": "1/1/2026",
+"type": "status",
+"status": "approved",
+"approvedBy": "1”
 }
-
 
 Field Table
 Field Name
 Field Type
 Description
-_id
+\_id
 string/ObjectId
 Unique identifier for the report
 spotId
@@ -446,28 +437,28 @@ studySessions
 The studySessions collection stores study sessions created by users. Users can create sessions within a specific study spot, including details such as course/topic/time/group size. Other users can send a request to join the created session while the number of participants has not exceeded the group size. The creator of the session can approve or reject the requests.
 Sample Document
 {
-  "_id": "1",
-  "creatorId": "1",
-  "spotId": "1",
-  "course": "CS 546",
-  "topic": "MongoDB Review",
-  "sessionTime": "1/1/2026 12:00",
-  "groupSize": 4,
-  "approvedMemberIds": [
-    "2"
-  ],
-  "pendingMemberIds": [
-    "3"
-  ],
-  "status": "Open",
-  "createdAt": "1/1/2026"
+"\_id": "1",
+"creatorId": "1",
+"spotId": "1",
+"course": "CS 546",
+"topic": "MongoDB Review",
+"sessionTime": "1/1/2026 12:00",
+"groupSize": 4,
+"approvedMemberIds": [
+"2"
+],
+"pendingMemberIds": [
+"3"
+],
+"status": "Open",
+"createdAt": "1/1/2026"
 }
 
 Field Table
 Field Name
 Field Type
 Description
-_id
+\_id
 string/ObjectId
 Unique identifier for the study session
 creatorId
@@ -501,27 +492,25 @@ createdAt
 date
 Date and time when the session was created
 
-
-
 SpotSuggestions
 Sample Document
 {
-  "_id": "1",
-  "submittedBy": "1",
-  "name": "Hidden Grounds Coffee",
-  "category": "Cafe",
-  "address": "79 Hudson St, Hoboken, NJ",
-  "description": "Small cafe with good coffee, decent WiFi, and some outlets.",
-  "status": "Pending",
-  "reviewedBy": null,
-  "reviewNotes": "",
-  "submittedAt": "1/1/2026"
+"\_id": "1",
+"submittedBy": "1",
+"name": "Hidden Grounds Coffee",
+"category": "Cafe",
+"address": "79 Hudson St, Hoboken, NJ",
+"description": "Small cafe with good coffee, decent WiFi, and some outlets.",
+"status": "Pending",
+"reviewedBy": null,
+"reviewNotes": "",
+"submittedAt": "1/1/2026"
 }
 Field Table
 Field Name
 Field Type
 Description
-_id
+\_id
 string/ObjectId
 Unique identifier for the suggestion
 submittedBy
@@ -552,8 +541,6 @@ submittedAt
 date
 Date and time when the suggestion was submitted
 
-
-
 File Structure:
 /CS546-Spot-Scouter
 │
@@ -561,62 +548,62 @@ File Structure:
 ├── package.json
 │
 ├── /config
-│   └── mongoConnection.js
+│ └── mongoConnection.js
 │
 ├── /data
-│   ├── users.js
-│   ├── spots.js
-│   ├── reviews.js
-│   ├── reports.js
-│   ├── sessions.js
-│   └── favorites.js
+│ ├── users.js
+│ ├── spots.js
+│ ├── reviews.js
+│ ├── reports.js
+│ ├── sessions.js
+│ └── favorites.js
 │
 ├── /routes
-│   ├── auth.js
-│   ├── users.js
-│   ├── spots.js
-│   ├── reports.js
-│   ├── sessions.js
-│   └── index.js
+│ ├── auth.js
+│ ├── users.js
+│ ├── spots.js
+│ ├── reports.js
+│ ├── sessions.js
+│ └── index.js
 │
 ├── /views
-│   ├── layouts
-│   │   └── main.handlebars
-│   │
-│   ├── auth
-│   │   ├── login.handlebars
-│   │   └── signup.handlebars
-│   │
-│   ├── spots
-│   │   ├── list.handlebars
-│   │   ├── detail.handlebars
-│   │   └── create.handlebars
-│   │
-│   ├── sessions
-│   │   ├── list.handlebars
-│   │   └── detail.handlebars
-│   │
-│   ├── user
-│   │   └── profile.handlebars
-│   │
-│   ├── partials
-│   │   ├── navbar.handlebars
-│   │   └── footer.handlebars
-│   │
-│   ├── error.handlebars
-│   └── home.handlebars
+│ ├── layouts
+│ │ └── main.handlebars
+│ │
+│ ├── auth
+│ │ ├── login.handlebars
+│ │ └── signup.handlebars
+│ │
+│ ├── spots
+│ │ ├── list.handlebars
+│ │ ├── detail.handlebars
+│ │ └── create.handlebars
+│ │
+│ ├── sessions
+│ │ ├── list.handlebars
+│ │ └── detail.handlebars
+│ │
+│ ├── user
+│ │ └── profile.handlebars
+│ │
+│ ├── partials
+│ │ ├── navbar.handlebars
+│ │ └── footer.handlebars
+│ │
+│ ├── error.handlebars
+│ └── home.handlebars
 │
 ├── /public
-│   ├── css
-│   │   └── styles.css
-│   │
-│   ├── js
-│   │   └── client.js
-│   │
-│   └── images
+│ ├── css
+│ │ └── styles.css
+│ │
+│ ├── js
+│ │ └── client.js
+│ │
+│ └── images
 │
 ├── /utils
-│   ├── helpers.js
-│   └── validators.js
+│ ├── helpers.js
+│ └── validators.js
 │
 └── README.md

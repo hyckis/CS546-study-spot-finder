@@ -1,0 +1,11 @@
+<h2>Sign Up</h2>
+{{#if error}}<p class="error">{{error}}</p>{{/if}}
+<form method="POST" action="/auth/signup" class="spot-form">
+  <label>Username <input type="text" name="username" required></label>
+  <label>First Name <input type="text" name="firstName"></label>
+  <label>Last Name <input type="text" name="lastName"></label>
+  <label>Major <input type="text" name="major"></label>
+  <label>Email <input type="email" name="email" required></label>
+  <label>Password <input type="password" name="password" required></label>
+  <button type="submit">Create Account</button>
+</form>
