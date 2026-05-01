@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{title}} - Spot Scouter</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <h1><a href="/">Spot Scouter</a></h1>
+    <nav>
+      <a href="/spots">Study Spots</a>
+      <a href="/spots/suggest">Suggest Spot</a>
+      {{#if isAdmin}}
+        <a href="/admin/spots">Admin Spots</a>
+        <a href="/admin/spots/suggestions/review">Review Suggestions</a>
+      {{/if}}
+      {{#if userId}}
+        <span class="nav-user">{{username}}</span>
+        <form method="POST" action="/auth/logout" class="inline-form"><button type="submit">Log out</button></form>
+      {{else}}
+        <a href="/auth/login">Login</a>
+        <a href="/auth/signup">Sign Up</a>
+      {{/if}}
+    </nav>
+  </header>
+  <main class="container">
+    {{{body}}}
+  </main>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<h2>Admin - Spot Suggestions</h2>
+{{#if suggestions.length}}
+  {{#each suggestions}}
+    <article class="card">
+      <h3>{{name}} <span class="badge">{{status}}</span></h3>
+      <p>{{category}} · {{address}}, {{boroughOrCity}}, {{state}} {{zipCode}}</p>
+      <p>{{description}}</p>
+      <p>WiFi: {{#if wifiAvailable}}Yes{{else}}No{{/if}} · Outlets: {{#if outletsAvailable}}Yes{{else}}No{{/if}} · Status: {{openStatus}}</p>
+      <p>Submitted by: {{submittedByName}}</p>
+      {{#if reviewNotes}}<p>Review notes: {{reviewNotes}}</p>{{/if}}
+      <form method="POST" action="/admin/spots/suggestions/{{_id}}/approve" class="review-form">
+        <input type="text" name="reviewNotes" placeholder="Optional review notes">
+        <button type="submit">Approve</button>
+      </form>
+      <form method="POST" action="/admin/spots/suggestions/{{_id}}/deny" class="review-form">
+        <input type="text" name="reviewNotes" placeholder="Reason for denial">
+        <button type="submit">Deny</button>
+      </form>
+    </article>
+  {{/each}}
+{{else}}
+  <p>No suggestions submitted yet.</p>
+{{/if}}

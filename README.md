@@ -3,7 +3,7 @@
 Project Name: Spot Scouter
 Group Members:
 ● YiChin Ho
-● Wanli Yang(comment)
+● Wanli Yang
 ● Jaycen Pagen
 ● Yuxi Chen
 
