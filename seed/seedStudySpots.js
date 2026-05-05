@@ -1,7 +1,6 @@
-const mongoose = require("mongoose");
-const Spot = require("../models/Spot");
-const SpotSuggestion = require("../models/SpotSuggestion");
-const User = require("../models/User");
+import Spot from "../models/Spot";
+import SpotSuggestion from "../models/SpotSuggestion.js";
+import User from "../models/User.js";
 
 const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/Group15_Project";
 

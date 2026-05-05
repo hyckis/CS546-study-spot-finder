@@ -2,17 +2,10 @@ import express from "express";
 import { engine } from "express-handlebars";
 import session from "express-session";
 import MongoStore from "connect-mongo";
-import mongoose from "mongoose";
 import path from "path";
 import { fileURLToPath } from "url";
 
 import configRoutes from "./routes/index.js";
-
-import authRoutes = from "./routes/auth";
-import spotRoutes = from "./routes/spots";
-import adminSpotRoutes = from "./routes/adminSpots";
-import userRoutes = from "./routes/users";
-import favoriteRoutes = from "./routes/favorites";
 
 const app = express();
 const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/Group15_Project";
@@ -24,6 +17,7 @@ app.engine("handlebars", engine({ defaultLayout: "main" }));
 app.set("view engine", "handlebars");
 app.set("views", path.join(__dirname, "views"));
 
+app.use("/public", express.static(path.join(__dirname, "public")));
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
@@ -46,33 +40,6 @@ app.use((req, res, next) => {
   next();
 });
 
-mongoose
-  .connect(MONGO_URI)
-  .then(() => console.log("Connected to MongoDB"))
-  .catch((err) => console.error("MongoDB connection error:", err));
-
-app.get("/", (_req, res) => {
-  res.render("home", { title: "Home" });
-});
-
-app.use('/public', express.static('public'));
-app.use("/auth", authRoutes);
-app.use("/spots", spotRoutes);
-app.use("/admin/spots", adminSpotRoutes);
-app.use("/users", userRoutes);
-app.use("/favorites", favoriteRoutes);
-
-app.use((_req, res) => {
-  res.status(404).render("error", { title: "Not Found", error: "Page not found." });
-});
-
-app.engine('handlebars', exphbs.engine({ defaultLayout: 'main' }));
-app.set('view engine', 'handlebars');
-
+configRoutes(app);
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
-configRoutes(app);
-app.listen(3000, () => {
-  console.log("We've now got a server!");
-});

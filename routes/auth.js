@@ -1,6 +1,11 @@
-const express = require("express");
-const router = express.Router();
-const User = require("../models/User");
+import { Router } from "express";
+import {
+  getUserByEmail,
+  createUser,
+  comparePassword
+} from "../data/users.js";
+
+const router = Router();
 
 router.get("/login", (req, res) => {
   if (req.session.userId) return res.redirect("/");
@@ -9,17 +14,36 @@ router.get("/login", (req, res) => {
 
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
+
   try {
-    const user = await User.findOne({ email });
-    if (!user) return res.render("auth/login", { title: "Login", error: "Invalid email or password." });
-    const valid = await user.isValidPassword(password);
-    if (!valid) return res.render("auth/login", { title: "Login", error: "Invalid email or password." });
+    const user = await getUserByEmail(email);
+
+    if (!user) {
+      return res.render("auth/login", {
+        title: "Login",
+        error: "Invalid email or password."
+      });
+    }
+
+    const valid = await comparePassword(password, user.passwordHash);
+
+    if (!valid) {
+      return res.render("auth/login", {
+        title: "Login",
+        error: "Invalid email or password."
+      });
+    }
+
     req.session.userId = user._id.toString();
     req.session.username = user.username;
     req.session.userRole = user.role || "user";
+
     res.redirect("/");
   } catch (err) {
-    res.render("auth/login", { title: "Login", error: err.message });
+    res.render("auth/login", {
+      title: "Login",
+      error: err.message || err
+    });
   }
 });
 
@@ -30,17 +54,37 @@ router.get("/signup", (req, res) => {
 
 router.post("/signup", async (req, res) => {
   const { username, email, password, firstName, lastName, major } = req.body;
+
   try {
-    const existing = await User.findOne({ email });
-    if (existing) return res.render("auth/signup", { title: "Sign Up", error: "Email already in use." });
-    const user = new User({ username, email, passwordHash: password, firstName, lastName, major, role: "user" });
-    await user.save();
+    const existing = await getUserByEmail(email);
+
+    if (existing) {
+      return res.render("auth/signup", {
+        title: "Sign Up",
+        error: "Email already in use."
+      });
+    }
+
+    const user = await createUser({
+      username,
+      email,
+      password,
+      firstName,
+      lastName,
+      major,
+      role: "user"
+    });
+
     req.session.userId = user._id.toString();
     req.session.username = user.username;
     req.session.userRole = user.role || "user";
+
     res.redirect("/");
   } catch (err) {
-    res.render("auth/signup", { title: "Sign Up", error: err.message });
+    res.render("auth/signup", {
+      title: "Sign Up",
+      error: err.message || err
+    });
   }
 });
 
@@ -52,4 +96,4 @@ router.post("/logout", (req, res) => {
   });
 });
 
-module.exports = router;
+export default router;

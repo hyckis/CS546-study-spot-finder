@@ -3,7 +3,7 @@ import {
   createStatusReport,
   createClosureReport,
   getActiveStatusReportsBySpotId,
-  getAggregatedStatus,
+  getAggregatedReportStatus,
   getPendingClosureReports,
   resolveClosureReport
 } from '../data/reports.js';
@@ -84,7 +84,7 @@ router.get('/spots/:spotId/active', async (req, res) => {
 // Get aggregated status as JSON, useful for AJAX
 router.get('/spots/:spotId/summary', async (req, res) => {
   try {
-    const summary = await getAggregatedStatusBySpotId(req.params.spotId);
+    const summary = await getAggregatedReportStatus(req.params.spotId);
     return res.json(summary);
   } catch (e) {
     return res.status(400).json({ error: e });
