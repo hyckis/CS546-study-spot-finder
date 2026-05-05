@@ -1,5 +1,5 @@
-import { Router } from 'express';
-import User from '../models/User.js';
+import { Router } from "express";
+import { getUserById } from "../data/users.js";
 
 import {
   createSession,
@@ -8,7 +8,7 @@ import {
   rejectRequest,
   searchSessions,
   matchSessions
-} from '../data/sessions.js';
+} from "../data/sessions.js";
 
 const router = Router();
 
@@ -18,15 +18,16 @@ router.get("/current", async (req, res) => {
   }
 
   try {
-    const user = await User.findById(req.session.userId).select("-passwordHash");
+    const user = await getUserById(req.session.userId);
 
     if (!user) {
       return res.status(404).json({ error: "User not found." });
     }
 
-    return res.json(user);
+    const { passwordHash, ...safeUser } = user;
+    return res.json(safeUser);
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err.message || err });
   }
 });
 

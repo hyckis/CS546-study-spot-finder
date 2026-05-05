@@ -1,7 +1,25 @@
-const express = require("express");
-const router = express.Router();
-const Spot = require("../models/Spot");
-const SpotSuggestion = require("../models/SpotSuggestion");
+import { Router } from "express";
+
+import {
+  getAllSpots,
+  getSpotById
+} from "../data/spots.js";
+
+import {
+  getActiveStatusReportsBySpotId,
+  getAggregatedReportStatus
+} from "../data/reports.js";
+
+import {
+  getReviewsBySpotId
+} from "../data/reviews.js";
+
+import {
+  createSpotSuggestion,
+  getSpotSuggestionById
+} from "../data/spotSuggestions.js";
+
+const router = Router();
 
 function cleanString(value, fieldName) {
   if (typeof value !== "string") throw new Error(`${fieldName} must be a string.`);
@@ -14,27 +32,10 @@ function parseBoolean(value) {
   return value === true || value === "true" || value === "on" || value === "yes";
 }
 
-function buildSearchQuery(query) {
-  const filter = {};
-  const keyword = typeof query.q === "string" ? query.q.trim() : "";
-  if (keyword) {
-    filter.$or = [
-      { name: { $regex: keyword, $options: "i" } },
-      { address: { $regex: keyword, $options: "i" } },
-      { boroughOrCity: { $regex: keyword, $options: "i" } },
-      { description: { $regex: keyword, $options: "i" } },
-    ];
-  }
-  if (query.category) filter.category = query.category;
-  if (query.wifiAvailable === "true") filter.wifiAvailable = true;
-  if (query.outletsAvailable === "true") filter.outletsAvailable = true;
-  if (query.openStatus) filter.openStatus = query.openStatus;
-  return filter;
-}
-
 router.get("/", async (req, res) => {
   try {
-    const spots = await Spot.find(buildSearchQuery(req.query)).sort({ name: 1 }).lean();
+    const spots = await getAllSpots();
+
     res.render("spots/list", {
       title: "Study Spots",
       spots,
@@ -45,7 +46,10 @@ router.get("/", async (req, res) => {
       outletsChecked: req.query.outletsAvailable === "true",
     });
   } catch (err) {
-    res.status(500).render("error", { title: "Error", error: err.message });
+    res.status(500).render("error", {
+      title: "Error",
+      error: err.message || err
+    });
   }
 });
 
@@ -54,49 +58,86 @@ router.get("/suggest", (req, res) => {
 });
 
 router.post("/suggest", async (req, res) => {
-  try {
-    const suggestion = await SpotSuggestion.create({
-      submittedBy: req.session && req.session.userId ? req.session.userId : undefined,
-      submittedByName: req.session && req.session.username ? req.session.username : "Guest User",
-      name: cleanString(req.body.name, "Name"),
-      category: cleanString(req.body.category, "Category"),
-      address: cleanString(req.body.address, "Address"),
-      boroughOrCity: cleanString(req.body.boroughOrCity, "City"),
-      state: cleanString(req.body.state, "State"),
-      zipCode: cleanString(req.body.zipCode, "ZIP code"),
-      coordinates: {
-        latitude: Number(req.body.latitude) || 0,
-        longitude: Number(req.body.longitude) || 0,
-      },
-      wifiAvailable: parseBoolean(req.body.wifiAvailable),
-      outletsAvailable: parseBoolean(req.body.outletsAvailable),
-      openStatus: req.body.openStatus || "Unknown",
-      description: cleanString(req.body.description, "Description"),
-    });
-    res.redirect(`/spots/suggestion-submitted/${suggestion._id}`);
-  } catch (err) {
-    res.status(400).render("spots/suggest", { title: "Suggest a Study Spot", error: err.message, form: req.body });
-  }
+  const suggestion = await createSpotSuggestion({
+    submittedBy: req.session && req.session.userId ? req.session.userId : null,
+    submittedByName: req.session && req.session.username ? req.session.username : "Guest User",
+    name: cleanString(req.body.name, "Name"),
+    category: cleanString(req.body.category, "Category"),
+    address: cleanString(req.body.address, "Address"),
+    boroughOrCity: cleanString(req.body.boroughOrCity, "City"),
+    state: cleanString(req.body.state, "State"),
+    zipCode: cleanString(req.body.zipCode, "ZIP code"),
+    coordinates: {
+      latitude: Number(req.body.latitude) || 0,
+      longitude: Number(req.body.longitude) || 0
+    },
+    wifiAvailable: parseBoolean(req.body.wifiAvailable),
+    outletsAvailable: parseBoolean(req.body.outletsAvailable),
+    openStatus: req.body.openStatus || "Unknown",
+    description: cleanString(req.body.description, "Description")
+  });
+
+  res.redirect(`/spots/suggestion-submitted/${suggestion._id}`);
 });
 
 router.get("/suggestion-submitted/:id", async (req, res) => {
   try {
-    const suggestion = await SpotSuggestion.findById(req.params.id).lean();
-    if (!suggestion) return res.status(404).render("error", { title: "Not Found", error: "Suggestion not found." });
-    res.render("spots/suggestionSubmitted", { title: "Suggestion Submitted", suggestion });
+    const suggestion = await getSpotSuggestionById(req.params.id);
+
+    if (!suggestion) {
+      return res.status(404).render("error", {
+        title: "Not Found",
+        error: "Suggestion not found."
+      });
+    }
+
+    res.render("spots/suggestionSubmitted", {
+      title: "Suggestion Submitted",
+      suggestion
+    });
   } catch (err) {
-    res.status(400).render("error", { title: "Error", error: "Invalid suggestion id." });
+    res.status(400).render("error", {
+      title: "Error",
+      error: err.message || "Invalid suggestion id."
+    });
   }
 });
 
 router.get("/:id", async (req, res) => {
   try {
-    const spot = await Spot.findById(req.params.id).lean();
-    if (!spot) return res.status(404).render("error", { title: "Not Found", error: "Study spot not found." });
-    res.render("spots/detail", { title: spot.name, spot });
+    const spot = await getSpotById(req.params.id);
+
+    if (!spot) {
+      return res.status(404).render("error", {
+        title: "Not Found",
+        error: "Study spot not found."
+      });
+    }
+
+    const activeReports = await getActiveStatusReportsBySpotId(req.params.id);
+    const reportSummary = await getAggregatedReportStatus(req.params.id);
+    const reviews = await getReviewsBySpotId(req.params.id);
+
+    res.render("spots/detail", {
+      title: spot.name,
+      spot,
+      activeReports: activeReports || [],
+      hasActiveReports: activeReports && activeReports.length > 0,
+      reportSummary: reportSummary || {
+        reportCount: 0,
+        wifiStatus: "No recent reports",
+        socketStatus: "No recent reports",
+        crowdednessStatus: "No recent reports"
+      },
+      reviews: reviews || []
+    });    
+
   } catch (err) {
-    res.status(400).render("error", { title: "Error", error: "Invalid spot id." });
+    res.status(400).render("error", {
+      title: "Error",
+      error: err.message || "Invalid spot id."
+    });
   }
 });
 
-module.exports = router;
+export default router;

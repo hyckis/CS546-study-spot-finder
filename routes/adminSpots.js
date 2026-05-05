@@ -1,8 +1,15 @@
-const express = require("express");
-const router = express.Router();
-const Spot = require("../models/Spot");
-const SpotSuggestion = require("../models/SpotSuggestion");
-const requireAdmin = require("../middleware/requireAdmin");
+import { Router } from "express";
+import {
+  getAllSpots,
+  getSpotById,
+  createSpot,
+  updateSpot,
+  deleteSpot
+} from "../data/spots.js";
+
+import requireAdmin from "../middleware/requireAdmin.js";
+
+const router = Router();
 
 function cleanString(value, fieldName) {
   if (typeof value !== "string") throw new Error(`${fieldName} must be a string.`);
@@ -18,10 +25,18 @@ function parseBoolean(value) {
 function formToSpot(body, sourceType = "admin") {
   const latitude = Number(body.latitude);
   const longitude = Number(body.longitude);
+
   if (!Number.isFinite(latitude)) throw new Error("Latitude must be a number.");
   if (!Number.isFinite(longitude)) throw new Error("Longitude must be a number.");
-  const avg = body.averageRating === undefined || body.averageRating === "" ? 0 : Number(body.averageRating);
-  if (!Number.isFinite(avg) || avg < 0 || avg > 5) throw new Error("Average rating must be between 0 and 5.");
+
+  const avg =
+    body.averageRating === undefined || body.averageRating === ""
+      ? 0
+      : Number(body.averageRating);
+
+  if (!Number.isFinite(avg) || avg < 0 || avg > 5) {
+    throw new Error("Average rating must be between 0 and 5.");
+  }
 
   return {
     name: cleanString(body.name, "Name"),
@@ -38,6 +53,7 @@ function formToSpot(body, sourceType = "admin") {
     averageRating: avg,
     sourceType,
     createdBy: "admin",
+    updatedAt: new Date()
   };
 }
 
@@ -45,93 +61,115 @@ router.use(requireAdmin);
 
 router.get("/", async (req, res) => {
   try {
-    const spots = await Spot.find({}).sort({ name: 1 }).lean();
+    const spots = await getAllSpots();
     res.render("admin/spots", { title: "Admin - Study Spots", spots });
   } catch (err) {
-    res.status(500).render("error", { title: "Error", error: err.message });
+    res.status(500).render("error", {
+      title: "Error",
+      error: err.message || err
+    });
   }
 });
 
 router.get("/new", (req, res) => {
-  res.render("admin/spotForm", { title: "Create Study Spot", action: "/admin/spots", buttonText: "Create Spot" });
+  res.render("admin/spotForm", {
+    title: "Create Study Spot",
+    action: "/admin/spots",
+    buttonText: "Create Spot"
+  });
 });
 
 router.post("/", async (req, res) => {
   try {
-    const spot = await Spot.create(formToSpot(req.body, "admin"));
-    res.redirect(`/spots/${spot._id}`);
+    const spot = await createSpot(formToSpot(req.body, "admin"));
+    res.redirect(`/spots/${spot._id.toString()}`);
   } catch (err) {
-    res.status(400).render("admin/spotForm", { title: "Create Study Spot", action: "/admin/spots", buttonText: "Create Spot", error: err.message, spot: req.body });
+    res.status(400).render("admin/spotForm", {
+      title: "Create Study Spot",
+      action: "/admin/spots",
+      buttonText: "Create Spot",
+      error: err.message || err,
+      spot: req.body
+    });
   }
 });
 
+// Temporarily disabled until spotSuggestions data functions are implemented
 router.get("/suggestions/review", async (req, res) => {
-  try {
-    const suggestions = await SpotSuggestion.find({}).sort({ createdAt: -1 }).lean();
-    res.render("admin/suggestions", { title: "Admin - Spot Suggestions", suggestions });
-  } catch (err) {
-    res.status(500).render("error", { title: "Error", error: err.message });
-  }
+  res.status(501).render("error", {
+    title: "Not Implemented",
+    error: "Spot suggestion review is not implemented yet."
+  });
 });
 
 router.post("/suggestions/:id/approve", async (req, res) => {
-  try {
-    const suggestion = await SpotSuggestion.findById(req.params.id);
-    if (!suggestion) return res.status(404).render("error", { title: "Not Found", error: "Suggestion not found." });
-    if (suggestion.status !== "Pending") return res.redirect("/admin/spots/suggestions/review");
-    const spot = await Spot.create({ name: suggestion.name, category: suggestion.category, address: suggestion.address, boroughOrCity: suggestion.boroughOrCity, state: suggestion.state, zipCode: suggestion.zipCode, coordinates: suggestion.coordinates || { latitude: 0, longitude: 0 }, wifiAvailable: suggestion.wifiAvailable, outletsAvailable: suggestion.outletsAvailable, openStatus: suggestion.openStatus, description: suggestion.description, averageRating: 0, sourceType: "approvedSuggestion", createdBy: "admin" });
-    suggestion.status = "Approved";
-    suggestion.reviewedBy = req.session.userId;
-    suggestion.reviewNotes = req.body.reviewNotes || "Approved and added to study spots.";
-    suggestion.reviewedAt = new Date();
-    await suggestion.save();
-    res.redirect(`/spots/${spot._id}`);
-  } catch (err) {
-    res.status(400).render("error", { title: "Error", error: err.message });
-  }
+  res.status(501).render("error", {
+    title: "Not Implemented",
+    error: "Spot suggestion approval is not implemented yet."
+  });
 });
 
 router.post("/suggestions/:id/deny", async (req, res) => {
-  try {
-    const suggestion = await SpotSuggestion.findById(req.params.id);
-    if (!suggestion) return res.status(404).render("error", { title: "Not Found", error: "Suggestion not found." });
-    suggestion.status = "Denied";
-    suggestion.reviewedBy = req.session.userId;
-    suggestion.reviewNotes = req.body.reviewNotes || "Denied by admin.";
-    suggestion.reviewedAt = new Date();
-    await suggestion.save();
-    res.redirect("/admin/spots/suggestions/review");
-  } catch (err) {
-    res.status(400).render("error", { title: "Error", error: err.message });
-  }
+  res.status(501).render("error", {
+    title: "Not Implemented",
+    error: "Spot suggestion denial is not implemented yet."
+  });
 });
 
 router.get("/:id/edit", async (req, res) => {
   try {
-    const spot = await Spot.findById(req.params.id).lean();
-    if (!spot) return res.status(404).render("error", { title: "Not Found", error: "Study spot not found." });
-    res.render("admin/spotForm", { title: "Edit Study Spot", action: `/admin/spots/${spot._id}`, buttonText: "Update Spot", spot });
+    const spot = await getSpotById(req.params.id);
+
+    if (!spot) {
+      return res.status(404).render("error", {
+        title: "Not Found",
+        error: "Study spot not found."
+      });
+    }
+
+    res.render("admin/spotForm", {
+      title: "Edit Study Spot",
+      action: `/admin/spots/${spot._id}`,
+      buttonText: "Update Spot",
+      spot
+    });
   } catch (err) {
-    res.status(400).render("error", { title: "Error", error: "Invalid spot id." });
+    res.status(400).render("error", {
+      title: "Error",
+      error: err.message || "Invalid spot id."
+    });
   }
 });
 
 router.post("/:id", async (req, res) => {
   try {
-    await Spot.findByIdAndUpdate(req.params.id, formToSpot(req.body, req.body.sourceType || "admin"), { runValidators: true });
+    await updateSpot(
+      req.params.id,
+      formToSpot(req.body, req.body.sourceType || "admin")
+    );
+
     res.redirect(`/spots/${req.params.id}`);
   } catch (err) {
-    res.status(400).render("admin/spotForm", { title: "Edit Study Spot", action: `/admin/spots/${req.params.id}`, buttonText: "Update Spot", error: err.message, spot: { ...req.body, _id: req.params.id } });
+    res.status(400).render("admin/spotForm", {
+      title: "Edit Study Spot",
+      action: `/admin/spots/${req.params.id}`,
+      buttonText: "Update Spot",
+      error: err.message || err,
+      spot: { ...req.body, _id: req.params.id }
+    });
   }
 });
 
 router.post("/:id/delete", async (req, res) => {
   try {
-    await Spot.findByIdAndDelete(req.params.id);
+    await deleteSpot(req.params.id);
     res.redirect("/admin/spots");
   } catch (err) {
-    res.status(400).render("error", { title: "Error", error: "Could not delete study spot." });
+    res.status(400).render("error", {
+      title: "Error",
+      error: err.message || "Could not delete study spot."
+    });
   }
 });
 
-module.exports = router;
+export default router;

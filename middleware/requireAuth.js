@@ -5,4 +5,5 @@ const requireAuth = (req, res, next) => {
   next();
 };
 
-module.exports = requireAuth;
+export default requireAuth;
+//module.exports = requireAuth;
