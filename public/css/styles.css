@@ -150,3 +150,14 @@ th {
 .review-form {
   margin-top: 10px;
 }
+
+.map-section {
+  margin-top: 20px;
+}
+
+.spot-map {
+  width: 100%;
+  min-height: 320px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}

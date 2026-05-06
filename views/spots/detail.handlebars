@@ -19,6 +19,21 @@
     <li>Source: {{spot.sourceType}}</li>
   </ul>
 
+  <section class="map-section">
+    <h2>Map View</h2>
+    {{#if hasMap}}
+      <p>This map shows the selected study spot based on the latitude and longitude stored in the studySpots collection.</p>
+      <iframe
+        class="spot-map"
+        title="Map location for {{spot.name}}"
+        src="{{mapEmbedUrl}}">
+      </iframe>
+      <p><a href="{{mapOpenUrl}}" target="_blank" rel="noopener noreferrer">Open larger map</a></p>
+    {{else}}
+      <p>Map view is not available because this study spot does not have valid coordinates.</p>
+    {{/if}}
+  </section>
+
   <section class="note-box">
     <h2>Reviews and Real-Time Reports</h2>
     <p>This section is prepared for the Reporting and Review System. Reviews, WiFi reports, socket reports, and crowdedness reports can be connected here by Part 3.</p>

@@ -36,6 +36,27 @@ const buildFilter = (query) => {
   return filter;
 };
 
+const buildMapLinks = (spot) => {
+  const latitude = Number(spot?.coordinates?.latitude);
+  const longitude = Number(spot?.coordinates?.longitude);
+
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+    return { hasMap: false, mapEmbedUrl: null, mapOpenUrl: null };
+  }
+
+  const offset = 0.005;
+  const left = longitude - offset;
+  const bottom = latitude - offset;
+  const right = longitude + offset;
+  const top = latitude + offset;
+
+  return {
+    hasMap: true,
+    mapEmbedUrl: `https://www.openstreetmap.org/export/embed.html?bbox=${left}%2C${bottom}%2C${right}%2C${top}&layer=mapnik&marker=${latitude}%2C${longitude}`,
+    mapOpenUrl: `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=16/${latitude}/${longitude}`,
+  };
+};
+
 router.get("/", async (req, res) => {
   try {
     const filter = buildFilter(req.query);
@@ -96,7 +117,15 @@ router.get("/:id", async (req, res) => {
       return res.status(404).render("error", { title: "Not Found", error: "Study spot not found." });
     }
 
-    res.render("spots/detail", { title: spot.name, spot });
+    const mapData = buildMapLinks(spot);
+
+    res.render("spots/detail", {
+      title: spot.name,
+      spot,
+      hasMap: mapData.hasMap,
+      mapEmbedUrl: mapData.mapEmbedUrl,
+      mapOpenUrl: mapData.mapOpenUrl,
+    });
   } catch (err) {
     res.status(400).render("error", { title: "Error", error: "Invalid study spot id." });
   }
