@@ -1,143 +1,105 @@
-import { Router } from "express";
+const express = require("express");
+const router = express.Router();
+const Spot = require("../models/Spot");
+const SpotSuggestion = require("../models/SpotSuggestion");
+const requireAuth = require("../middleware/requireAuth");
 
-import {
-  getAllSpots,
-  getSpotById
-} from "../data/spots.js";
+const buildFilter = (query) => {
+  const filter = { approved: true };
 
-import {
-  getActiveStatusReportsBySpotId,
-  getAggregatedReportStatus
-} from "../data/reports.js";
+  if (query.search && query.search.trim()) {
+    const search = query.search.trim();
+    filter.$or = [
+      { name: new RegExp(search, "i") },
+      { address: new RegExp(search, "i") },
+      { boroughOrCity: new RegExp(search, "i") },
+      { description: new RegExp(search, "i") },
+    ];
+  }
 
-import {
-  getReviewsBySpotId
-} from "../data/reviews.js";
+  if (query.category && query.category !== "All") {
+    filter.category = query.category;
+  }
 
-import {
-  createSpotSuggestion,
-  getSpotSuggestionById
-} from "../data/spotSuggestions.js";
+  if (query.wifiAvailable === "true") {
+    filter.wifiAvailable = true;
+  }
 
-const router = Router();
+  if (query.outletsAvailable === "true") {
+    filter.outletsAvailable = true;
+  }
 
-function cleanString(value, fieldName) {
-  if (typeof value !== "string") throw new Error(`${fieldName} must be a string.`);
-  const trimmed = value.trim();
-  if (!trimmed) throw new Error(`${fieldName} cannot be empty.`);
-  return trimmed;
-}
+  if (query.openStatus && query.openStatus !== "All") {
+    filter.openStatus = query.openStatus;
+  }
 
-function parseBoolean(value) {
-  return value === true || value === "true" || value === "on" || value === "yes";
-}
+  return filter;
+};
 
 router.get("/", async (req, res) => {
   try {
-    const spots = await getAllSpots();
+    const filter = buildFilter(req.query);
+    const spots = await Spot.find(filter).sort({ name: 1 }).lean();
 
     res.render("spots/list", {
       title: "Study Spots",
       spots,
-      q: req.query.q || "",
-      category: req.query.category || "",
-      openStatus: req.query.openStatus || "",
-      wifiChecked: req.query.wifiAvailable === "true",
-      outletsChecked: req.query.outletsAvailable === "true",
+      query: req.query,
     });
   } catch (err) {
-    res.status(500).render("error", {
-      title: "Error",
-      error: err.message || err
-    });
+    res.status(500).render("error", { title: "Error", error: err.message });
   }
 });
 
-router.get("/suggest", (req, res) => {
+router.get("/suggest", requireAuth, (req, res) => {
   res.render("spots/suggest", { title: "Suggest a Study Spot" });
 });
 
-router.post("/suggest", async (req, res) => {
-  const suggestion = await createSpotSuggestion({
-    submittedBy: req.session && req.session.userId ? req.session.userId : null,
-    submittedByName: req.session && req.session.username ? req.session.username : "Guest User",
-    name: cleanString(req.body.name, "Name"),
-    category: cleanString(req.body.category, "Category"),
-    address: cleanString(req.body.address, "Address"),
-    boroughOrCity: cleanString(req.body.boroughOrCity, "City"),
-    state: cleanString(req.body.state, "State"),
-    zipCode: cleanString(req.body.zipCode, "ZIP code"),
-    coordinates: {
-      latitude: Number(req.body.latitude) || 0,
-      longitude: Number(req.body.longitude) || 0
-    },
-    wifiAvailable: parseBoolean(req.body.wifiAvailable),
-    outletsAvailable: parseBoolean(req.body.outletsAvailable),
-    openStatus: req.body.openStatus || "Unknown",
-    description: cleanString(req.body.description, "Description")
-  });
-
-  res.redirect(`/spots/suggestion-submitted/${suggestion._id}`);
-});
-
-router.get("/suggestion-submitted/:id", async (req, res) => {
+router.post("/suggest", requireAuth, async (req, res) => {
   try {
-    const suggestion = await getSpotSuggestionById(req.params.id);
-
-    if (!suggestion) {
-      return res.status(404).render("error", {
-        title: "Not Found",
-        error: "Suggestion not found."
-      });
-    }
-
-    res.render("spots/suggestionSubmitted", {
-      title: "Suggestion Submitted",
-      suggestion
+    const suggestion = new SpotSuggestion({
+      submittedBy: req.session.userId,
+      name: req.body.name,
+      category: req.body.category,
+      address: req.body.address,
+      boroughOrCity: req.body.boroughOrCity,
+      state: req.body.state,
+      zipCode: req.body.zipCode,
+      latitude: Number(req.body.latitude),
+      longitude: Number(req.body.longitude),
+      wifiAvailable: req.body.wifiAvailable === "on",
+      outletsAvailable: req.body.outletsAvailable === "on",
+      openStatus: req.body.openStatus || "Unknown",
+      description: req.body.description,
+      status: "Pending",
     });
+
+    await suggestion.save();
+    res.redirect("/spots/suggestion-submitted");
   } catch (err) {
-    res.status(400).render("error", {
-      title: "Error",
-      error: err.message || "Invalid suggestion id."
+    res.status(400).render("spots/suggest", {
+      title: "Suggest a Study Spot",
+      error: err.message,
+      form: req.body,
     });
   }
+});
+
+router.get("/suggestion-submitted", requireAuth, (_req, res) => {
+  res.render("spots/suggestionSubmitted", { title: "Suggestion Submitted" });
 });
 
 router.get("/:id", async (req, res) => {
   try {
-    const spot = await getSpotById(req.params.id);
-
+    const spot = await Spot.findOne({ _id: req.params.id, approved: true }).lean();
     if (!spot) {
-      return res.status(404).render("error", {
-        title: "Not Found",
-        error: "Study spot not found."
-      });
+      return res.status(404).render("error", { title: "Not Found", error: "Study spot not found." });
     }
 
-    const activeReports = await getActiveStatusReportsBySpotId(req.params.id);
-    const reportSummary = await getAggregatedReportStatus(req.params.id);
-    const reviews = await getReviewsBySpotId(req.params.id);
-
-    res.render("spots/detail", {
-      title: spot.name,
-      spot,
-      activeReports: activeReports || [],
-      hasActiveReports: activeReports && activeReports.length > 0,
-      reportSummary: reportSummary || {
-        reportCount: 0,
-        wifiStatus: "No recent reports",
-        socketStatus: "No recent reports",
-        crowdednessStatus: "No recent reports"
-      },
-      reviews: reviews || []
-    });    
-
+    res.render("spots/detail", { title: spot.name, spot });
   } catch (err) {
-    res.status(400).render("error", {
-      title: "Error",
-      error: err.message || "Invalid spot id."
-    });
+    res.status(400).render("error", { title: "Error", error: "Invalid study spot id." });
   }
 });
 
-export default router;
+module.exports = router;

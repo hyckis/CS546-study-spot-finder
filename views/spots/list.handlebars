@@ -1,35 +1,55 @@
-<h2>Study Spots</h2>
+<h1>Study Spots</h1>
+<p>Browse libraries, cafes, and other study locations.</p>
+
 <form method="GET" action="/spots" class="filter-form">
-  <input type="text" name="q" placeholder="Search by name, city, or address" value="{{q}}">
-  <select name="category">
-    <option value="">All categories</option>
-    <option value="Library">Library</option>
-    <option value="Cafe">Cafe</option>
-    <option value="Study Room">Study Room</option>
-    <option value="Campus Building">Campus Building</option>
-    <option value="Other">Other</option>
-  </select>
-  <select name="openStatus">
-    <option value="">Any open status</option>
-    <option value="Open">Open</option>
-    <option value="Closed">Closed</option>
-    <option value="Temporarily Closed">Temporarily Closed</option>
-    <option value="Unknown">Unknown</option>
-  </select>
-  <label><input type="checkbox" name="wifiAvailable" value="true" {{#if wifiChecked}}checked{{/if}}> WiFi</label>
-  <label><input type="checkbox" name="outletsAvailable" value="true" {{#if outletsChecked}}checked{{/if}}> Outlets</label>
+  <label>
+    Search
+    <input type="text" name="search" value="{{query.search}}" placeholder="Name, address, city">
+  </label>
+  <label>
+    Category
+    <select name="category">
+      <option value="All">All</option>
+      <option value="Library">Library</option>
+      <option value="Cafe">Cafe</option>
+      <option value="Campus">Campus</option>
+      <option value="Other">Other</option>
+    </select>
+  </label>
+  <label>
+    Open Status
+    <select name="openStatus">
+      <option value="All">All</option>
+      <option value="Open">Open</option>
+      <option value="Closed">Closed</option>
+      <option value="Unknown">Unknown</option>
+    </select>
+  </label>
+  <label class="checkbox-label">
+    <input type="checkbox" name="wifiAvailable" value="true"> WiFi
+  </label>
+  <label class="checkbox-label">
+    <input type="checkbox" name="outletsAvailable" value="true"> Outlets
+  </label>
   <button type="submit">Search</button>
 </form>
+
+<p><a class="button secondary" href="/spots/suggest">Suggest a new study spot</a></p>
 
 {{#if spots.length}}
   <div class="card-grid">
     {{#each spots}}
       <article class="card">
-        <h3><a href="/spots/{{_id}}">{{name}}</a></h3>
-        <p>{{category}} · {{boroughOrCity}}, {{state}}</p>
-        <p>{{description}}</p>
-        <p>Rating: {{averageRating}} / 5</p>
-        <p>WiFi: {{#if wifiAvailable}}Yes{{else}}No{{/if}} · Outlets: {{#if outletsAvailable}}Yes{{else}}No{{/if}} · Status: {{openStatus}}</p>
+        <h2><a href="/spots/{{this._id}}">{{this.name}}</a></h2>
+        <p><strong>{{this.category}}</strong> · {{this.boroughOrCity}}, {{this.state}}</p>
+        <p>{{this.description}}</p>
+        <ul class="compact-list">
+          <li>WiFi: {{#if this.wifiAvailable}}Available{{else}}Not listed{{/if}}</li>
+          <li>Outlets: {{#if this.outletsAvailable}}Available{{else}}Not listed{{/if}}</li>
+          <li>Status: {{this.openStatus}}</li>
+          <li>Average rating: {{this.averageRating}}</li>
+        </ul>
+        <a class="button" href="/spots/{{this._id}}">View Detail</a>
       </article>
     {{/each}}
   </div>
