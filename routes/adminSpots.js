@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { ObjectId } from "mongodb";
 import {
   getAllSpots,
   getSpotById,
@@ -6,6 +7,11 @@ import {
   updateSpot,
   deleteSpot
 } from "../data/spots.js";
+import {
+  getAllSpotSuggestions,
+  getSpotSuggestionById,
+  updateSpotSuggestionReview
+} from "../data/spotSuggestions.js";
 
 import requireAdmin from "../middleware/requireAdmin.js";
 
@@ -18,16 +24,27 @@ function cleanString(value, fieldName) {
   return trimmed;
 }
 
+function optionalString(value) {
+  if (typeof value !== "string") return "";
+  return value.trim();
+}
+
 function parseBoolean(value) {
   return value === true || value === "true" || value === "on" || value === "yes";
 }
 
-function formToSpot(body, sourceType = "admin") {
-  const latitude = Number(body.latitude);
-  const longitude = Number(body.longitude);
+function parseCoordinate(value, fieldName, min, max) {
+  const numberValue = Number(value);
+  if (!Number.isFinite(numberValue)) throw new Error(`${fieldName} must be a number.`);
+  if (numberValue < min || numberValue > max) {
+    throw new Error(`${fieldName} must be between ${min} and ${max}.`);
+  }
+  return numberValue;
+}
 
-  if (!Number.isFinite(latitude)) throw new Error("Latitude must be a number.");
-  if (!Number.isFinite(longitude)) throw new Error("Longitude must be a number.");
+function formToSpot(body, sourceType = "admin", currentAdminId = null) {
+  const latitude = parseCoordinate(body.latitude, "Latitude", -90, 90);
+  const longitude = parseCoordinate(body.longitude, "Longitude", -180, 180);
 
   const avg =
     body.averageRating === undefined || body.averageRating === ""
@@ -48,11 +65,14 @@ function formToSpot(body, sourceType = "admin") {
     coordinates: { latitude, longitude },
     wifiAvailable: parseBoolean(body.wifiAvailable),
     outletsAvailable: parseBoolean(body.outletsAvailable),
-    openStatus: body.openStatus || "Unknown",
+    openStatus: optionalString(body.openStatus) || "Unknown",
     description: cleanString(body.description, "Description"),
     averageRating: avg,
     sourceType,
-    createdBy: "admin",
+    approved: true,
+    reviewedBy: currentAdminId,
+    reviewNotes: optionalString(body.reviewNotes),
+    createdBy: currentAdminId || "admin",
     updatedAt: new Date()
   };
 }
@@ -81,7 +101,7 @@ router.get("/new", (req, res) => {
 
 router.post("/", async (req, res) => {
   try {
-    const spot = await createSpot(formToSpot(req.body, "admin"));
+    const spot = await createSpot(formToSpot(req.body, "admin", req.session.userId));
     res.redirect(`/spots/${spot._id.toString()}`);
   } catch (err) {
     res.status(400).render("admin/spotForm", {
@@ -94,26 +114,96 @@ router.post("/", async (req, res) => {
   }
 });
 
-// Temporarily disabled until spotSuggestions data functions are implemented
 router.get("/suggestions/review", async (req, res) => {
-  res.status(501).render("error", {
-    title: "Not Implemented",
-    error: "Spot suggestion review is not implemented yet."
-  });
+  try {
+    const suggestions = await getAllSpotSuggestions();
+    res.render("admin/suggestions", {
+      title: "Review Spot Suggestions",
+      suggestions
+    });
+  } catch (err) {
+    res.status(500).render("error", {
+      title: "Error",
+      error: err.message || err
+    });
+  }
 });
 
 router.post("/suggestions/:id/approve", async (req, res) => {
-  res.status(501).render("error", {
-    title: "Not Implemented",
-    error: "Spot suggestion approval is not implemented yet."
-  });
+  try {
+    const suggestion = await getSpotSuggestionById(req.params.id);
+    if (!suggestion) {
+      return res.status(404).render("error", {
+        title: "Not Found",
+        error: "Spot suggestion not found."
+      });
+    }
+
+    if (suggestion.status === "Approved") {
+      return res.redirect("/admin/spots/suggestions/review");
+    }
+
+    const createdSpot = await createSpot({
+      name: suggestion.name,
+      category: suggestion.category,
+      address: suggestion.address,
+      boroughOrCity: suggestion.boroughOrCity,
+      state: suggestion.state,
+      zipCode: suggestion.zipCode,
+      coordinates: suggestion.coordinates,
+      wifiAvailable: suggestion.wifiAvailable,
+      outletsAvailable: suggestion.outletsAvailable,
+      openStatus: suggestion.openStatus || "Unknown",
+      description: suggestion.description,
+      averageRating: 0,
+      sourceType: "approvedSuggestion",
+      approved: true,
+      reviewedBy: req.session.userId,
+      reviewNotes: optionalString(req.body.reviewNotes) || "Approved by admin.",
+      createdBy: suggestion.submittedBy || suggestion.submittedByName || "user"
+    });
+
+    await updateSpotSuggestionReview(req.params.id, {
+      status: "Approved",
+      reviewedBy: new ObjectId(req.session.userId),
+      reviewNotes: optionalString(req.body.reviewNotes) || "Approved by admin.",
+      reviewedAt: new Date(),
+      createdSpotId: new ObjectId(createdSpot._id)
+    });
+
+    res.redirect("/admin/spots/suggestions/review");
+  } catch (err) {
+    res.status(400).render("error", {
+      title: "Error",
+      error: err.message || err
+    });
+  }
 });
 
 router.post("/suggestions/:id/deny", async (req, res) => {
-  res.status(501).render("error", {
-    title: "Not Implemented",
-    error: "Spot suggestion denial is not implemented yet."
-  });
+  try {
+    const suggestion = await getSpotSuggestionById(req.params.id);
+    if (!suggestion) {
+      return res.status(404).render("error", {
+        title: "Not Found",
+        error: "Spot suggestion not found."
+      });
+    }
+
+    await updateSpotSuggestionReview(req.params.id, {
+      status: "Denied",
+      reviewedBy: new ObjectId(req.session.userId),
+      reviewNotes: optionalString(req.body.reviewNotes) || "Denied by admin.",
+      reviewedAt: new Date()
+    });
+
+    res.redirect("/admin/spots/suggestions/review");
+  } catch (err) {
+    res.status(400).render("error", {
+      title: "Error",
+      error: err.message || err
+    });
+  }
 });
 
 router.get("/:id/edit", async (req, res) => {
@@ -145,7 +235,7 @@ router.post("/:id", async (req, res) => {
   try {
     await updateSpot(
       req.params.id,
-      formToSpot(req.body, req.body.sourceType || "admin")
+      formToSpot(req.body, req.body.sourceType || "admin", req.session.userId)
     );
 
     res.redirect(`/spots/${req.params.id}`);
@@ -167,7 +257,7 @@ router.post("/:id/delete", async (req, res) => {
   } catch (err) {
     res.status(400).render("error", {
       title: "Error",
-      error: err.message || "Could not delete study spot."
+      error: err.message || err
     });
   }
 });
