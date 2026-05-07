@@ -1,71 +1,30 @@
 <article class="detail-card">
-  <h2>{{spot.name}}</h2>
+  <h1>{{spot.name}}</h1>
   <p><strong>Category:</strong> {{spot.category}}</p>
   <p><strong>Address:</strong> {{spot.address}}, {{spot.boroughOrCity}}, {{spot.state}} {{spot.zipCode}}</p>
   <p><strong>Description:</strong> {{spot.description}}</p>
-  <p><strong>Average Rating:</strong> {{spot.averageRating}} / 5</p>
-  <p><strong>WiFi Available:</strong> {{#if spot.wifiAvailable}}Yes{{else}}No{{/if}}</p>
-  <p><strong>Outlets Available:</strong> {{#if spot.outletsAvailable}}Yes{{else}}No{{/if}}</p>
-  <p><strong>Open Status:</strong> {{spot.openStatus}}</p>
-  <p><strong>Source:</strong> {{spot.sourceType}}</p>
-  <p><strong>Coordinates:</strong> {{spot.coordinates.latitude}}, {{spot.coordinates.longitude}}</p>
-</article>
 
-{{#if isAdmin}}
-  <p>
-    <a class="button" href="/admin/spots/{{spot._id}}/edit">Edit This Spot</a>
-  </p>
-{{/if}}
+  <h2>Location Data</h2>
+  <ul>
+    <li>Latitude: {{spot.coordinates.latitude}}</li>
+    <li>Longitude: {{spot.coordinates.longitude}}</li>
+    <li>Source: {{spot.sourceType}}</li>
+  </ul>
 
-<section class="card">
-  <h3>Current Study Conditions</h3>
-
-  {{#if reportSummary}}
-    <p><strong>Reports Count:</strong> {{reportSummary.reportCount}}</p>
-    <p><strong>WiFi:</strong> {{reportSummary.wifiStatus}}</p>
-    <p><strong>Outlets:</strong> {{reportSummary.socketStatus}}</p>
-    <p><strong>Crowdedness:</strong> {{reportSummary.crowdednessStatus}}</p>
-  {{else}}
-    <p>No reports yet.</p>
-  {{/if}}
-</section>
-
-<section class="card">
-  <h3>Submit Real-Time Report</h3>
-
-  <form method="POST" action="/reports/spots/{{spot._id}}/status">
-    <label>
-      WiFi
-      <select name="wifiStatus" required>
-        <option value="Fast">Fast</option>
-        <option value="Moderately Fast">Moderately Fast</option>
-        <option value="Slow">Slow</option>
-      </select>
-    </label>
-
-    <label>
-      Outlets
-      <select name="socketStatus" required>
-        <option value="Enough">Enough</option>
-        <option value="Moderately Enough">Moderately Enough</option>
-        <option value="Full">Full</option>
-      </select>
-    </label>
-
-    <label>
-      Crowdedness
-      <select name="crowdednessStatus" required>
-        <option value="Quiet">Quiet</option>
-        <option value="Moderately Busy">Moderately Busy</option>
-        <option value="Crowded">Crowded</option>
-        <option value="Full">Full</option>
-      </select>
-    </label>
-
-    <button type="submit">Submit Report</button>
-  </form>
-</section>
-
+  <section class="map-section">
+    <h2>Map View</h2>
+    {{#if hasMap}}
+      <p>This map shows the selected study spot based on the latitude and longitude stored in the studySpots collection.</p>
+      <iframe
+        class="spot-map"
+        title="Map location for {{spot.name}}"
+        src="{{mapEmbedUrl}}">
+      </iframe>
+      <p><a href="{{mapOpenUrl}}" target="_blank" rel="noopener noreferrer">Open larger map</a></p>
+    {{else}}
+      <p>Map view is not available because this study spot does not have valid coordinates.</p>
+    {{/if}}
+  </section>
 <section class="card">
   <h3>Recent Reports</h3>
 

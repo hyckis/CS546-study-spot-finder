@@ -4,12 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{title}} - Spot Scouter</title>
-  <link rel="stylesheet" href="/public/css/styles.css">
+  <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
   <header class="site-header">
-    <h1><a href="/">Spot Scouter</a></h1>
-    <nav>
+    <nav class="nav">
+      <a class="brand" href="/">Spot Scouter</a>
       <a href="/spots">Study Spots</a>
       <a href="/spots/suggest">Suggest Spot</a>
       {{#if isAdmin}}
@@ -17,9 +17,12 @@
         <a href="/admin/spots/suggestions/review">Review Suggestions</a>
         <a href="/reports/admin/closures">Review Closure Reports</a>
       {{/if}}
+      <span class="nav-spacer"></span>
       {{#if userId}}
         <span class="nav-user">{{username}}</span>
-        <form method="POST" action="/auth/logout" class="inline-form"><button type="submit">Log out</button></form>
+        <form method="POST" action="/auth/logout" class="inline-form">
+          <button type="submit">Logout</button>
+        </form>
       {{else}}
         <a href="/auth/login">Login</a>
         <a href="/auth/signup">Sign Up</a>
@@ -29,6 +32,5 @@
   <main class="container">
     {{{body}}}
   </main>
-  {{> footer}}
 </body>
 </html>
