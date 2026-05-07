@@ -1,0 +1,25 @@
+<h2>Pending Closure Reports</h2>
+
+{{#if pendingReports}}
+  {{#each pendingReports}}
+    <article class="card">
+      <p><strong>Report ID:</strong> {{_id}}</p>
+      <p><strong>Spot ID:</strong> {{spotId}}</p>
+      <p><strong>User ID:</strong> {{userId}}</p>
+      <p><strong>Status:</strong> {{status}}</p>
+      <p><strong>Created At:</strong> {{createdAt}}</p>
+
+      <form method="POST" action="/reports/admin/closures/{{_id}}/resolve" class="inline-form">
+        <input type="hidden" name="status" value="approved">
+        <button type="submit">Approve</button>
+      </form>
+
+      <form method="POST" action="/reports/admin/closures/{{_id}}/resolve" class="inline-form">
+        <input type="hidden" name="status" value="rejected">
+        <button type="submit">Reject</button>
+      </form>
+    </article>
+  {{/each}}
+{{else}}
+  <p>No pending closure reports.</p>
+{{/if}}

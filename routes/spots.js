@@ -116,8 +116,15 @@ router.get("/:id", async (req, res) => {
     if (!spot) {
       return res.status(404).render("error", { title: "Not Found", error: "Study spot not found." });
     }
-
+    
     const mapData = buildMapLinks(spot);
+    const activeReports = await getActiveStatusReportsBySpotId(req.params.id);
+    const reportSummary = await getAggregatedReportStatus(req.params.id);
+    const reviews = await getReviewsBySpotId(req.params.id);
+    const reviewsOwner = reviews.map((review) => ({
+      ...review,
+      isOwner: req.session.userId === review.userId
+    }));
 
     res.render("spots/detail", {
       title: spot.name,
@@ -125,6 +132,26 @@ router.get("/:id", async (req, res) => {
       hasMap: mapData.hasMap,
       mapEmbedUrl: mapData.mapEmbedUrl,
       mapOpenUrl: mapData.mapOpenUrl,
+      activeReports: activeReports || [],
+      hasActiveReports: activeReports && activeReports.length > 0,
+      reportSummary: reportSummary || {
+        reportCount: 0,
+        wifiStatus: "No recent reports",
+        socketStatus: "No recent reports",
+        crowdednessStatus: "No recent reports"
+      },
+      reviews: reviewsOwner || [],
+      hasReviews: reviews && reviewsOwner.length > 0,
+      currentUserId: req.session.userId || null,
+      reviewSuccess: req.query.success === "review",
+      reviewUpdated: req.query.success === "reviewUpdated",
+      reviewDeleted: req.query.success === "reviewDeleted"
+    });    
+
+  } catch (err) {
+    res.status(400).render("error", {
+      title: "Error",
+      error: err.message || "Invalid spot id."
     });
   } catch (err) {
     res.status(400).render("error", { title: "Error", error: "Invalid study spot id." });

@@ -4,14 +4,6 @@
   <p><strong>Address:</strong> {{spot.address}}, {{spot.boroughOrCity}}, {{spot.state}} {{spot.zipCode}}</p>
   <p><strong>Description:</strong> {{spot.description}}</p>
 
-  <h2>Availability Information</h2>
-  <ul>
-    <li>WiFi: {{#if spot.wifiAvailable}}Available{{else}}Not listed{{/if}}</li>
-    <li>Outlets: {{#if spot.outletsAvailable}}Available{{else}}Not listed{{/if}}</li>
-    <li>Open Status: {{spot.openStatus}}</li>
-    <li>Average Rating: {{spot.averageRating}}</li>
-  </ul>
-
   <h2>Location Data</h2>
   <ul>
     <li>Latitude: {{spot.coordinates.latitude}}</li>
@@ -33,11 +25,104 @@
       <p>Map view is not available because this study spot does not have valid coordinates.</p>
     {{/if}}
   </section>
+<section class="card">
+  <h3>Recent Reports</h3>
 
-  <section class="note-box">
-    <h2>Reviews and Real-Time Reports</h2>
-    <p>This section is prepared for the Reporting and Review System. Reviews, WiFi reports, socket reports, and crowdedness reports can be connected here by Part 3.</p>
+  {{#if hasActiveReports}}
+    <ul>
+      {{#each activeReports}}
+        <li>
+          WiFi: {{wifiStatus}},
+          Outlets: {{socketStatus}},
+          Crowd: {{crowdednessStatus}}
+        </li>
+      {{/each}}
+    </ul>
+  {{else}}
+    <p>No active reports.</p>
+  {{/if}}
+</section>
+
+<section class="card">
+  <h3>Report Spot Closure</h3>
+  <p>If this study spot is closed or unavailable, submit a closure report for admin review.</p>
+
+  <form method="POST" action="/reports/spots/{{spot._id}}/closure">
+    <button type="submit">Report as Closed</button>
+  </form>
+</section>
+
+{{#if reviewSuccess}}
+  <section class="card">
+    <p>Closure report submitted successfully.</p>
   </section>
+{{/if}}
 
-  <p><a href="/spots">Back to Study Spots</a></p>
-</article>
+
+<section class="card">
+  <h3>Leave a Review</h3>
+
+  <form method="POST" action="/reviews/spots/{{spot._id}}">
+    <label>
+      Rating
+      <select name="rating" required>
+        <option value="5">5</option>
+        <option value="4">4</option>
+        <option value="3">3</option>
+        <option value="2">2</option>
+        <option value="1">1</option>
+      </select>
+    </label>
+
+    <label>
+      Comment
+      <textarea name="comment" required></textarea>
+    </label>
+
+    <button type="submit">Submit Review</button>
+  </form>
+</section>
+
+<section class="card">
+  <h3>Reviews</h3>
+
+  {{#if hasReviews}}
+    <ul>
+      {{#each reviews}}
+        <li>
+          ☆ {{rating}} — {{comment}} 
+          <strong>By:</strong> {{username}}
+          {{#if isOwner}}
+            <form method="POST" action="/reviews/{{_id}}/update">
+              <label>
+                Rating
+                <select name="rating" required>
+                  <option value="5">5</option>
+                  <option value="4">4</option>
+                  <option value="3">3</option>
+                  <option value="2">2</option>
+                  <option value="1">1</option>
+                </select>
+              </label>
+
+              <label>
+                Comment
+                <textarea name="comment" required>{{comment}}</textarea>
+              </label>
+
+              <button type="submit">Update Review</button>
+            </form>
+
+            <form method="POST" action="/reviews/{{_id}}/delete">
+              <button type="submit">Delete Review</button>
+            </form>
+          {{/if}}
+        </li>
+      {{/each}}
+    </ul>
+  {{else}}
+    <p>No reviews yet.</p>
+  {{/if}}
+</section>
+
+<p><a href="/spots">Back to study spots</a></p>
