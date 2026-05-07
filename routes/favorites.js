@@ -1,62 +1,64 @@
-const express = require("express");
-const router = express.Router();
-const Favorite = require("../models/Favorite");
-const Spot = require("../models/Spot");
-const requireAuth = require("../middleware/requireAuth");
+import { Router } from "express";
+import {
+  getFavoritesByUserId,
+  addFavorite,
+  removeFavorite
+} from "../data/favorites.js";
+import { getSpotById } from "../data/spots.js";
+import requireAuth from "../middleware/requireAuth.js";
 
-// GET /favorites — list the logged-in user's favorites
+const router = Router();
+
 router.get("/", requireAuth, async (req, res) => {
   try {
-    const favorites = await Favorite.find({ userId: req.session.userId })
-      .populate("spotId")
-      .lean();
+    const spots = await getFavoritesByUserId(req.session.userId);
 
-    // populate returns spotId as the full spot object; rename for clarity in template
-    const spots = [];
-    for (let i = 0; i < favorites.length; i++) {
-      if (favorites[i].spotId) {
-        spots.push(favorites[i].spotId);
-      }
-    }
-
-    res.render("user/favorites", { title: "My Favorites", spots });
+    res.render("user/favorites", {
+      title: "My Favorites",
+      spots
+    });
   } catch (err) {
-    res.render("error", { title: "Error", error: err.message });
+    res.render("error", {
+      title: "Error",
+      error: err.message || err
+    });
   }
 });
 
-// POST /favorites — add a spot to favorites
 router.post("/", requireAuth, async (req, res) => {
   const { spotId } = req.body;
 
   try {
-    const spot = await Spot.findById(spotId);
+    const spot = await getSpotById(spotId);
+
     if (!spot) {
-      return res.status(404).render("error", { title: "Not Found", error: "Spot not found." });
+      return res.status(404).render("error", {
+        title: "Not Found",
+        error: "Spot not found."
+      });
     }
 
-    const favorite = new Favorite({ userId: req.session.userId, spotId });
-    await favorite.save();
-    res.redirect("/spots/" + spotId);
+    await addFavorite(req.session.userId, spotId);
+
+    res.redirect(`/spots/${spotId}`);
   } catch (err) {
-    if (err.code === 11000) {
-      return res.redirect("/spots/" + req.body.spotId);
-    }
-    res.render("error", { title: "Error", error: err.message });
+    res.render("error", {
+      title: "Error",
+      error: err.message || err
+    });
   }
 });
 
-// POST /favorites/:spotId/remove — remove a favorite
 router.post("/:spotId/remove", requireAuth, async (req, res) => {
   try {
-    await Favorite.findOneAndDelete({
-      userId: req.session.userId,
-      spotId: req.params.spotId,
-    });
+    await removeFavorite(req.session.userId, req.params.spotId);
     res.redirect("/favorites");
   } catch (err) {
-    res.render("error", { title: "Error", error: err.message });
+    res.render("error", {
+      title: "Error",
+      error: err.message || err
+    });
   }
 });
 
-module.exports = router;
+export default router;

@@ -1,15 +1,11 @@
 const requireAdmin = (req, res, next) => {
-  if (!req.session || !req.session.userId) {
-    return res.redirect("/auth/login");
-  }
-
-  if (req.session.role !== "admin") {
+  if (!req.session || !req.session.userId) return res.redirect("/auth/login");
+  if (req.session.userRole !== "admin") {
     return res.status(403).render("error", {
       title: "Forbidden",
-      error: "You must be an admin to access this page.",
+      error: "Admin access is required for this page.",
     });
   }
-
   next();
 };
 
