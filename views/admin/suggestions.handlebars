@@ -1,38 +1,23 @@
-<h1>Review Spot Suggestions</h1>
-<p>Approve suggestions to add them to the official study spot list, or deny suggestions and keep the review record.</p>
-
+<h2>Admin - Spot Suggestions</h2>
 {{#if suggestions.length}}
   {{#each suggestions}}
-    <article class="card suggestion-card">
-      <h2>{{this.name}}</h2>
-      <p><strong>Status:</strong> {{this.status}}</p>
-      <p><strong>Category:</strong> {{this.category}}</p>
-      <p><strong>Address:</strong> {{this.address}}, {{this.boroughOrCity}}, {{this.state}} {{this.zipCode}}</p>
-      <p><strong>Description:</strong> {{this.description}}</p>
-      <p><strong>WiFi:</strong> {{#if this.wifiAvailable}}Available{{else}}Not listed{{/if}} · <strong>Outlets:</strong> {{#if this.outletsAvailable}}Available{{else}}Not listed{{/if}}</p>
-      {{#if this.submittedBy}}
-        <p><strong>Submitted by:</strong> {{this.submittedBy.username}} ({{this.submittedBy.email}})</p>
-      {{/if}}
-      {{#if this.reviewNotes}}
-        <p><strong>Review Notes:</strong> {{this.reviewNotes}}</p>
-      {{/if}}
-
-      {{#if this.createdSpotId}}
-        <p><a href="/spots/{{this.createdSpotId}}">View created study spot</a></p>
-      {{/if}}
-
-      {{#if (eq this.status "Pending")}}
-        <form method="POST" action="/admin/spots/suggestions/{{this._id}}/approve" class="review-form">
-          <label>Approval Notes <input type="text" name="reviewNotes" placeholder="Optional approval notes"></label>
-          <button type="submit">Approve</button>
-        </form>
-        <form method="POST" action="/admin/spots/suggestions/{{this._id}}/deny" class="review-form">
-          <label>Denial Notes <input type="text" name="reviewNotes" placeholder="Reason for denial"></label>
-          <button type="submit" class="danger">Deny</button>
-        </form>
-      {{/if}}
+    <article class="card">
+      <h3>{{name}} <span class="badge">{{status}}</span></h3>
+      <p>{{category}} · {{address}}, {{boroughOrCity}}, {{state}} {{zipCode}}</p>
+      <p>{{description}}</p>
+      <p>WiFi: {{#if wifiAvailable}}Yes{{else}}No{{/if}} · Outlets: {{#if outletsAvailable}}Yes{{else}}No{{/if}} · Status: {{openStatus}}</p>
+      <p>Submitted by: {{submittedByName}}</p>
+      {{#if reviewNotes}}<p>Review notes: {{reviewNotes}}</p>{{/if}}
+      <form method="POST" action="/admin/spots/suggestions/{{_id}}/approve" class="review-form">
+        <input type="text" name="reviewNotes" placeholder="Optional review notes">
+        <button type="submit">Approve</button>
+      </form>
+      <form method="POST" action="/admin/spots/suggestions/{{_id}}/deny" class="review-form">
+        <input type="text" name="reviewNotes" placeholder="Reason for denial">
+        <button type="submit">Deny</button>
+      </form>
     </article>
   {{/each}}
 {{else}}
-  <p>No spot suggestions have been submitted yet.</p>
+  <p>No suggestions submitted yet.</p>
 {{/if}}

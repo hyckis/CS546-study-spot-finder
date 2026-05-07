@@ -21,8 +21,11 @@ const constructorMethod = (app) => {
   app.use("/sessions", sessionRoutes);
 
   app.use('*', (req, res) => {
-    res.status(404).render('error');
+    res.status(404).render('error', {
+      title: '404', 
+      error: 'Page not found'
+    });
   });
 };
 
-module.exports = constructorMethod;
+export default constructorMethod;

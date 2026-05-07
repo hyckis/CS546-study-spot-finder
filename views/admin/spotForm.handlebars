@@ -1,41 +1,33 @@
-<h1>{{title}}</h1>
+<h2>{{title}}</h2>
 {{#if error}}<p class="error">{{error}}</p>{{/if}}
-
-<form method="POST" action="{{action}}" class="form-card">
+<form method="POST" action="{{action}}" class="spot-form">
   <label>Name <input type="text" name="name" value="{{spot.name}}" required></label>
   <label>Category
     <select name="category" required>
       <option value="Library">Library</option>
       <option value="Cafe">Cafe</option>
-      <option value="Campus">Campus</option>
+      <option value="Study Room">Study Room</option>
+      <option value="Campus Building">Campus Building</option>
       <option value="Other">Other</option>
     </select>
   </label>
   <label>Address <input type="text" name="address" value="{{spot.address}}" required></label>
-  <label>City / Borough <input type="text" name="boroughOrCity" value="{{spot.boroughOrCity}}" required></label>
-  <label>State <input type="text" name="state" value="{{spot.state}}" maxlength="2" required></label>
+  <label>City/Borough <input type="text" name="boroughOrCity" value="{{spot.boroughOrCity}}" required></label>
+  <label>State <input type="text" name="state" value="{{spot.state}}" required></label>
   <label>ZIP Code <input type="text" name="zipCode" value="{{spot.zipCode}}" required></label>
-  <label>Latitude <input type="number" step="any" name="latitude" value="{{spot.coordinates.latitude}}{{spot.latitude}}" required></label>
-  <label>Longitude <input type="number" step="any" name="longitude" value="{{spot.coordinates.longitude}}{{spot.longitude}}" required></label>
+  <label>Latitude <input type="number" step="any" name="latitude" value="{{spot.coordinates.latitude}}" required></label>
+  <label>Longitude <input type="number" step="any" name="longitude" value="{{spot.coordinates.longitude}}" required></label>
+  <label><input type="checkbox" name="wifiAvailable" value="true" {{#if spot.wifiAvailable}}checked{{/if}}> WiFi available</label>
+  <label><input type="checkbox" name="outletsAvailable" value="true" {{#if spot.outletsAvailable}}checked{{/if}}> Outlets available</label>
   <label>Open Status
     <select name="openStatus">
       <option value="Unknown">Unknown</option>
       <option value="Open">Open</option>
       <option value="Closed">Closed</option>
+      <option value="Temporarily Closed">Temporarily Closed</option>
     </select>
   </label>
   <label>Average Rating <input type="number" step="0.1" min="0" max="5" name="averageRating" value="{{spot.averageRating}}"></label>
-  <label>Source Type
-    <select name="sourceType">
-      <option value="admin">admin</option>
-      <option value="dataset">dataset</option>
-      <option value="approvedSuggestion">approvedSuggestion</option>
-    </select>
-  </label>
-  <label class="checkbox-label"><input type="checkbox" name="wifiAvailable" {{#if spot.wifiAvailable}}checked{{/if}}> WiFi Available</label>
-  <label class="checkbox-label"><input type="checkbox" name="outletsAvailable" {{#if spot.outletsAvailable}}checked{{/if}}> Outlets Available</label>
   <label>Description <textarea name="description" required>{{spot.description}}</textarea></label>
-  <label>Review Notes <textarea name="reviewNotes">{{spot.reviewNotes}}</textarea></label>
-  <button type="submit">{{submitLabel}}</button>
+  <button type="submit">{{buttonText}}</button>
 </form>
-<p><a href="/admin/spots">Back to Admin Spots</a></p>
