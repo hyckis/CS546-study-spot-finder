@@ -12,9 +12,9 @@ const getCollectionFn = (collection) => {
 };
 
 export const users = getCollectionFn('users');
-export const spots = getCollectionFn('spots');
-export const studySpots = getCollectionFn('spots');
-export const spotSuggestions = getCollectionFn('spotsuggestions');
+export const spots = getCollectionFn('studySpots');
+export const studySpots = getCollectionFn('studySpots');
+export const spotSuggestions = getCollectionFn('spotSuggestions');
 export const reports = getCollectionFn('reports');
 export const sessions = getCollectionFn('sessions');
 export const reviews = getCollectionFn('reviews');

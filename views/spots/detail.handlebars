@@ -11,6 +11,22 @@
   <p><strong>Coordinates:</strong> {{spot.coordinates.latitude}}, {{spot.coordinates.longitude}}</p>
 </article>
 
+<section class="card map-card">
+  <h3>Map View</h3>
+  {{#if mapEmbedUrl}}
+    <iframe
+      class="spot-map"
+      title="Map location for {{spot.name}}"
+      src="{{mapEmbedUrl}}"
+      loading="lazy">
+    </iframe>
+    <p class="map-note">Map is based on this spot's saved latitude and longitude.</p>
+  {{else}}
+    <p>Map is not available because this spot does not have valid coordinates.</p>
+  {{/if}}
+</section>
+
+
 {{#if isAdmin}}
   <p>
     <a class="button" href="/admin/spots/{{spot._id}}/edit">Edit This Spot</a>

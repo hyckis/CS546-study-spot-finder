@@ -20,3 +20,8 @@ th, td { border-bottom: 1px solid #ddd; padding: 10px; text-align: left; }
 .badge { font-size: 13px; background: #eee; border-radius: 4px; padding: 3px 6px; }
 .review-form { margin-top: 8px; display: flex; gap: 8px; }
 .nav-user { color: #555; }
+
+
+.map-card { overflow: hidden; }
+.spot-map { width: 100%; min-height: 320px; border: 1px solid #ddd; border-radius: 8px; }
+.map-note { color: #555; font-size: 0.95rem; }
