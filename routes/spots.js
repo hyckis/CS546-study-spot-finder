@@ -117,6 +117,10 @@ router.get("/:id", async (req, res) => {
     const activeReports = await getActiveStatusReportsBySpotId(req.params.id);
     const reportSummary = await getAggregatedReportStatus(req.params.id);
     const reviews = await getReviewsBySpotId(req.params.id);
+    const reviewsOwner = reviews.map((review) => ({
+      ...review,
+      isOwner: req.session.userId === review.userId
+    }));
 
     res.render("spots/detail", {
       title: spot.name,
@@ -129,7 +133,12 @@ router.get("/:id", async (req, res) => {
         socketStatus: "No recent reports",
         crowdednessStatus: "No recent reports"
       },
-      reviews: reviews || []
+      reviews: reviewsOwner || [],
+      hasReviews: reviews && reviewsOwner.length > 0,
+      currentUserId: req.session.userId || null,
+      reviewSuccess: req.query.success === "review",
+      reviewUpdated: req.query.success === "reviewUpdated",
+      reviewDeleted: req.query.success === "reviewDeleted"
     });    
 
   } catch (err) {
