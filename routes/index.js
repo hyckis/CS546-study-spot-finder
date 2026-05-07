@@ -4,6 +4,7 @@ import adminSpotRoutes from "./adminSpots.js";
 import favoriteRoutes from "./favorites.js";
 import userRoutes from "./users.js";
 import reportRoutes from "./reports.js";
+import reviewRoutes from "./reviews.js";
 import sessionRoutes from "./sessions.js";
 
 const constructorMethod = (app) => {
@@ -16,6 +17,7 @@ const constructorMethod = (app) => {
   app.use("/favorites", favoriteRoutes);
   app.use("/users", userRoutes);
   app.use("/reports", reportRoutes);
+  app.use("/reviews", reviewRoutes);
   app.use("/sessions", sessionRoutes);
 
   app.use('*', (req, res) => {

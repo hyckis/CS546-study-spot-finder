@@ -85,6 +85,22 @@
 </section>
 
 <section class="card">
+  <h3>Report Spot Closure</h3>
+  <p>If this study spot is closed or unavailable, submit a closure report for admin review.</p>
+
+  <form method="POST" action="/reports/spots/{{spot._id}}/closure">
+    <button type="submit">Report as Closed</button>
+  </form>
+</section>
+
+{{#if reviewSuccess}}
+  <section class="card">
+    <p>Closure report submitted successfully.</p>
+  </section>
+{{/if}}
+
+
+<section class="card">
   <h3>Leave a Review</h3>
 
   <form method="POST" action="/reviews/spots/{{spot._id}}">
@@ -111,11 +127,37 @@
 <section class="card">
   <h3>Reviews</h3>
 
-  {{#if reviews}}
+  {{#if hasReviews}}
     <ul>
       {{#each reviews}}
         <li>
-          ⭐ {{rating}} — {{comment}}
+          ☆ {{rating}} — {{comment}} 
+          <strong>By:</strong> {{username}}
+          {{#if isOwner}}
+            <form method="POST" action="/reviews/{{_id}}/update">
+              <label>
+                Rating
+                <select name="rating" required>
+                  <option value="5">5</option>
+                  <option value="4">4</option>
+                  <option value="3">3</option>
+                  <option value="2">2</option>
+                  <option value="1">1</option>
+                </select>
+              </label>
+
+              <label>
+                Comment
+                <textarea name="comment" required>{{comment}}</textarea>
+              </label>
+
+              <button type="submit">Update Review</button>
+            </form>
+
+            <form method="POST" action="/reviews/{{_id}}/delete">
+              <button type="submit">Delete Review</button>
+            </form>
+          {{/if}}
         </li>
       {{/each}}
     </ul>

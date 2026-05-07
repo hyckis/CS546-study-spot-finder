@@ -11,7 +11,7 @@ import {
 const router = Router();
 
 const requireLogin = (req, res, next) => {
-  if (!req.session || !req.session.user) {
+  if (!req.session || !req.session.userId) {
     return res.status(401).render('error', {
       title: 'Unauthorized',
       error: 'You must be logged in to perform this action.'
@@ -21,7 +21,7 @@ const requireLogin = (req, res, next) => {
 };
 
 const requireAdmin = (req, res, next) => {
-  if (!req.session || !req.session.user || req.session.user.role !== 'admin') {
+  if (!req.session || req.session.userRole !== 'admin') {
     return res.status(403).render('error', {
       title: 'Forbidden',
       error: 'Admin access required.'
@@ -35,7 +35,7 @@ router.post('/spots/:spotId/status', requireLogin, async (req, res) => {
   try {
     const { spotId } = req.params;
     const { wifiStatus, socketStatus, crowdednessStatus } = req.body;
-    const userId = req.session.user._id;
+    const userId = req.session.userId;
 
     await createStatusReport(
       spotId,
@@ -58,8 +58,7 @@ router.post('/spots/:spotId/status', requireLogin, async (req, res) => {
 router.post('/spots/:spotId/closure', requireLogin, async (req, res) => {
   try {
     const { spotId } = req.params;
-    const userId = req.session.user._id;
-
+    const userId = req.session.userId;
     await createClosureReport(spotId, userId);
 
     return res.redirect(`/spots/${spotId}`);
@@ -113,7 +112,7 @@ router.post('/admin/closures/:reportId/resolve', requireAdmin, async (req, res) 
   try {
     const { reportId } = req.params;
     const { status } = req.body;
-    const adminId = req.session.user._id;
+    const adminId = req.session.userId;
 
     await resolveClosureReport(reportId, adminId, status);
 
@@ -122,6 +121,55 @@ router.post('/admin/closures/:reportId/resolve', requireAdmin, async (req, res) 
     return res.status(400).render('error', {
       title: 'Resolve Report Error',
       error: e
+    });
+  }
+});
+
+router.post("/spots/:spotId/closure", requireLogin, async (req, res) => {
+  try {
+    const { spotId } = req.params;
+    const userId = req.session.userId;
+
+    await createClosureReport(spotId, userId);
+
+    return res.redirect(`/spots/${spotId}`);
+  } catch (e) {
+    return res.status(400).render("error", {
+      title: "Closure Report Error",
+      error: e.message || e
+    });
+  }
+});
+
+router.get("/admin/closures", requireAdmin, async (req, res) => {
+  try {
+    const pendingReports = await getPendingClosureReports();
+
+    return res.render("reports/adminClosures", {
+      title: "Pending Closure Reports",
+      pendingReports
+    });
+  } catch (e) {
+    return res.status(500).render("error", {
+      title: "Admin Report Error",
+      error: e.message || e
+    });
+  }
+});
+
+router.post("/admin/closures/:reportId/resolve", requireAdmin, async (req, res) => {
+  try {
+    const { reportId } = req.params;
+    const { status } = req.body;
+    const adminId = req.session.userId;
+
+    await resolveClosureReport(reportId, adminId, status);
+
+    return res.redirect("/reports/admin/closures");
+  } catch (e) {
+    return res.status(400).render("error", {
+      title: "Resolve Report Error",
+      error: e.message || e
     });
   }
 });

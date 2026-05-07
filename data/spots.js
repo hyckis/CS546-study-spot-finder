@@ -1,22 +1,26 @@
 import { ObjectId } from "mongodb";
 import { spots } from "../config/mongoCollections.js";
-
-const checkId = (id) => {
-  if (!id || typeof id !== "string" || !ObjectId.isValid(id.trim())) {
-    throw new Error("Invalid spot id");
-  }
-  return id.trim();
-};
+import { checkId } from "../helpers.js";
 
 export const getAllSpots = async () => {
   const spotCollection = await spots();
-  return await spotCollection.find({}).sort({ name: 1 }).toArray();
+  const spotList = await spotCollection.find({}).sort({ name: 1 }).toArray();
+  const mapped = spotList.map((spot) => ({
+    ...spot,
+    _id: spot._id.toString()
+  }));
+  return mapped;
 };
 
 export const getSpotById = async (id) => {
   id = checkId(id);
   const spotCollection = await spots();
-  return await spotCollection.findOne({ _id: new ObjectId(id) });
+  const spot = await spotCollection.findOne({ _id: new ObjectId(id) });
+  if (!spot) return null;
+  return {
+    ...spot,
+    _id: spot._id.toString()
+  };
 };
 
 export const createSpot = async (spotData) => {
@@ -30,13 +34,11 @@ export const createSpot = async (spotData) => {
 
   const insertInfo = await spotCollection.insertOne(newSpot);
 
-  if (!insertInfo.acknowledged || !insertInfo.insertedId) {
-    throw new Error("Could not create study spot");
-  }
+  if (!insertInfo.acknowledged || !insertInfo.insertedId) throw new Error("Could not create study spot");
 
   return {
-    _id: insertInfo.insertedId.toString(),
-    ...newSpot
+    ...newSpot,
+    _id: insertInfo.insertedId.toString()
   };
 };
 

@@ -1,6 +1,6 @@
-import {reports} from '../config/mongoCollections.js';
-import {ObjectId} from 'mongodb';
-import {checkId} from '../helpers.js'
+import { reports } from '../config/mongoCollections.js';
+import { ObjectId } from 'mongodb';
+import { checkId, checkReportId } from '../helpers.js';
 
 const validWifiStatuses = ['Fast', 'Moderately Fast', 'Slow'];
 const validSocketStatuses = ['Enough', 'Moderately Enough', 'Full'];
@@ -15,8 +15,9 @@ export const createStatusReport = async (
     socketStatus,
     crowdednessStatus
 ) => {
-    spotId = checkId(spotId, 'spotId');
-    userId = checkId(userId, 'userId');
+
+    spotId = checkReportId(spotId, 'spotId');
+    userId = checkReportId(userId, 'userId');
 
     if (!validWifiStatuses.includes(wifiStatus)) throw 'Invalid WiFi status';
     if (!validSocketStatuses.includes(socketStatus)) throw 'Invalid socket status';
@@ -42,8 +43,8 @@ export const createStatusReport = async (
     };
 
 export const createClosureReport = async (spotId, userId) => {
-    spotId = checkId(spotId, 'spotId');
-    userId = checkId(userId, 'userId');
+    spotId = checkReportId(spotId, 'spotId');
+    userId = checkReportId(userId, 'userId');
 
     const reportCollection = await reports();
     const now = new Date();
@@ -57,6 +58,13 @@ export const createClosureReport = async (spotId, userId) => {
         createdAt: now
     };
 
+    const sameSpot = await reportCollection.findOne({
+        spotId: new ObjectId(spotId),
+        type: 'closure',
+        status: 'pending'
+    });
+    if (sameSpot) throw "There is already a pending closure report for this spot";
+
     const insertInfo = await reportCollection.insertOne(newReport);
     if (!insertInfo.acknowledged || !insertInfo.insertedId) throw 'Could not create closure report';
     
@@ -64,19 +72,19 @@ export const createClosureReport = async (spotId, userId) => {
 };
 
 export const getActiveStatusReportsBySpotId = async(spotId) => {
-    if (!ObjectId.isValid(spotId)) throw "Invalid spotId";
     const reportCollection = await reports();
     return await reportCollection.find({
         spotId: new ObjectId(spotId),
         type: 'status',
         expiresAt: {$gt: new Date()}
-    }).toArray();
+    }).sort({createdAt: -1}).toArray();
 };
 
 export const getAggregatedReportStatus = async(spotId) => {
-    const reportCollection = await reports();
+    const activeReports = await getActiveStatusReportsBySpotId(spotId);
+    const reportArray = Array.isArray(activeReports) ? activeReports : [];
 
-    if (activeReports.length === 0) {
+    if (!reportArray || reportArray.length === 0) {
         return {
             reportCount: 0,
             wifiStatus: 'No recent reports',
@@ -85,13 +93,13 @@ export const getAggregatedReportStatus = async(spotId) => {
         };
     }
 
-    const getMostCommon = (reports, field) => {
+    const getMostCommon = (field) => {
         const counts = {};
-        for (const report of reports) {
+        for (const report of reportArray) {
             const value = report[field];
             if (value) counts[value] = (counts[value] || 0) + 1;
         }
-        let mostCommon = null;
+        let mostCommon = "No recent reports";
         let maxCount = 0;
         for (const value in counts) {
             if (counts[value] > maxCount) {
@@ -103,10 +111,10 @@ export const getAggregatedReportStatus = async(spotId) => {
     };
 
     return {
-        reportCount: activeReports.length,
-        wifiStatus: getMostCommon(activeReports, 'wifiStatus'),
-        socketStatus: getMostCommon(activeReports, 'socketStatus'),
-        crowdednessStatus: getMostCommon(activeReports, 'crowdednessStatus')
+        reportCount: reportArray.length,
+        wifiStatus: getMostCommon('wifiStatus'),
+        socketStatus: getMostCommon('socketStatus'),
+        crowdednessStatus: getMostCommon('crowdednessStatus')
     };
 };
 
