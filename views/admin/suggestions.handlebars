@@ -7,15 +7,32 @@
       <p>{{description}}</p>
       <p>WiFi: {{#if wifiAvailable}}Yes{{else}}No{{/if}} · Outlets: {{#if outletsAvailable}}Yes{{else}}No{{/if}} · Status: {{openStatus}}</p>
       <p>Submitted by: {{submittedByName}}</p>
-      {{#if reviewNotes}}<p>Review notes: {{reviewNotes}}</p>{{/if}}
-      <form method="POST" action="/admin/spots/suggestions/{{_id}}/approve" class="review-form">
-        <input type="text" name="reviewNotes" placeholder="Optional review notes">
-        <button type="submit">Approve</button>
-      </form>
-      <form method="POST" action="/admin/spots/suggestions/{{_id}}/deny" class="review-form">
-        <input type="text" name="reviewNotes" placeholder="Reason for denial">
-        <button type="submit">Deny</button>
-      </form>
+
+      {{#if reviewNotes}}
+        <p>Review notes: {{reviewNotes}}</p>
+      {{/if}}
+
+      {{#if isApproved}}
+        <p class="success-message">Approved and added to the study spots collection.</p>
+        {{#if createdSpotId}}
+          <p><a href="/spots/{{createdSpotId}}">View approved study spot</a></p>
+        {{/if}}
+      {{/if}}
+
+      {{#if isDenied}}
+        <p class="error-message">Denied. This suggestion was not added to the study spots collection.</p>
+      {{/if}}
+
+      {{#if isPending}}
+        <form method="POST" action="/admin/spots/suggestions/{{_id}}/approve" class="review-form">
+          <input type="text" name="reviewNotes" placeholder="Optional review notes">
+          <button type="submit">Approve</button>
+        </form>
+        <form method="POST" action="/admin/spots/suggestions/{{_id}}/deny" class="review-form">
+          <input type="text" name="reviewNotes" placeholder="Reason for denial">
+          <button type="submit">Deny</button>
+        </form>
+      {{/if}}
     </article>
   {{/each}}
 {{else}}
