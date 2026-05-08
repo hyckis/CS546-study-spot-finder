@@ -210,7 +210,8 @@ router.get("/:id", async (req, res) => {
       currentUserId: req.session.userId || null,
       reviewSuccess: req.query.success === "review",
       reviewUpdated: req.query.success === "reviewUpdated",
-      reviewDeleted: req.query.success === "reviewDeleted"
+      reviewDeleted: req.query.success === "reviewDeleted",
+      isClosed: spot.openStatus === "Closed"
     });
   } catch (err) {
     res.status(400).render("error", {
