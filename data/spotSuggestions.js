@@ -4,12 +4,17 @@ import { checkId } from "../helpers.js";
 
 const mapSuggestion = (suggestion) => {
   if (!suggestion) return null;
+  const status = suggestion.status || "Pending";
   return {
     ...suggestion,
+    status,
     _id: suggestion._id.toString(),
     submittedBy: suggestion.submittedBy ? suggestion.submittedBy.toString() : null,
     reviewedBy: suggestion.reviewedBy ? suggestion.reviewedBy.toString() : null,
-    createdSpotId: suggestion.createdSpotId ? suggestion.createdSpotId.toString() : null
+    createdSpotId: suggestion.createdSpotId ? suggestion.createdSpotId.toString() : null,
+    isPending: status === "Pending",
+    isApproved: status === "Approved",
+    isDenied: status === "Denied"
   };
 };
 

@@ -25,3 +25,13 @@ th, td { border-bottom: 1px solid #ddd; padding: 10px; text-align: left; }
 .map-card { overflow: hidden; }
 .spot-map { width: 100%; min-height: 320px; border: 1px solid #ddd; border-radius: 8px; }
 .map-note { color: #555; font-size: 0.95rem; }
+
+.success-message {
+  color: #166534;
+  font-weight: 600;
+}
+
+.error-message {
+  color: #991b1b;
+  font-weight: 600;
+}

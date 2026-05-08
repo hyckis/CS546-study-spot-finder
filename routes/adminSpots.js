@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { ObjectId } from "mongodb";
 import {
   getAllSpots,
   getSpotById,
@@ -139,9 +138,11 @@ router.post("/suggestions/:id/approve", async (req, res) => {
       });
     }
 
-    if (suggestion.status === "Approved") {
+    if (suggestion.status !== "Pending") {
       return res.redirect("/admin/spots/suggestions/review");
     }
+
+    const reviewNotes = optionalString(req.body.reviewNotes) || "Approved by admin.";
 
     const createdSpot = await createSpot({
       name: suggestion.name,
@@ -158,17 +159,17 @@ router.post("/suggestions/:id/approve", async (req, res) => {
       averageRating: 0,
       sourceType: "approvedSuggestion",
       approved: true,
-      reviewedBy: req.session.userId,
-      reviewNotes: optionalString(req.body.reviewNotes) || "Approved by admin.",
+      reviewedBy: req.session.userId || null,
+      reviewNotes,
       createdBy: suggestion.submittedBy || suggestion.submittedByName || "user"
     });
 
     await updateSpotSuggestionReview(req.params.id, {
       status: "Approved",
-      reviewedBy: new ObjectId(req.session.userId),
-      reviewNotes: optionalString(req.body.reviewNotes) || "Approved by admin.",
+      reviewedBy: req.session.userId || null,
+      reviewNotes,
       reviewedAt: new Date(),
-      createdSpotId: new ObjectId(createdSpot._id)
+      createdSpotId: createdSpot._id
     });
 
     res.redirect("/admin/spots/suggestions/review");
@@ -190,9 +191,13 @@ router.post("/suggestions/:id/deny", async (req, res) => {
       });
     }
 
+    if (suggestion.status !== "Pending") {
+      return res.redirect("/admin/spots/suggestions/review");
+    }
+
     await updateSpotSuggestionReview(req.params.id, {
       status: "Denied",
-      reviewedBy: new ObjectId(req.session.userId),
+      reviewedBy: req.session.userId || null,
       reviewNotes: optionalString(req.body.reviewNotes) || "Denied by admin.",
       reviewedAt: new Date()
     });
