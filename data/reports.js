@@ -1,4 +1,4 @@
-import { reports } from '../config/mongoCollections.js';
+import { reports, spots } from '../config/mongoCollections.js';
 import { ObjectId } from 'mongodb';
 import { checkId, checkReportId } from '../helpers.js';
 
@@ -132,6 +132,12 @@ export const resolveClosureReport = async(reportId, adminId, status) => {
     if (!validReviewStatuses.includes(status)) throw 'Invalid status';
 
     const reportCollection = await reports();
+    const report = await reportCollection.findOne({
+        _id: new ObjectId(reportId),
+        type: 'closure'
+    });
+    if (!report) throw 'Closure report not found';
+    
     const updateInfo = await reportCollection.updateOne({
         _id: new ObjectId(reportId),
         type: 'closure'
@@ -142,7 +148,26 @@ export const resolveClosureReport = async(reportId, adminId, status) => {
             resolvedAt: new Date()
         }
     });
+    if (status === 'approved') {
+        const spotCollection = await spots();
+        await spotCollection.updateOne(
+            { _id: report.spotId },
+            {$set: {
+                openStatus: 'Closed',
+                updatedAt: new Date()
+            }}
+        );
+    }
     
     if (updateInfo.modifiedCount === 0) throw 'Could not resolve closure report';
     return true;
+};
+
+export const getAllClosureReports = async () => {
+  const reportCollection = await reports();
+
+  return await reportCollection
+    .find({ type: "closure" })
+    .sort({ createdAt: -1 })
+    .toArray();
 };

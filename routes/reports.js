@@ -4,7 +4,7 @@ import {
   createClosureReport,
   getActiveStatusReportsBySpotId,
   getAggregatedReportStatus,
-  getPendingClosureReports,
+  getAllClosureReports,
   resolveClosureReport
 } from '../data/reports.js';
 
@@ -90,14 +90,23 @@ router.get('/spots/:spotId/summary', async (req, res) => {
   }
 });
 
-// Admin page / route for pending closure reports
+// Admin page / route for closure reports
 router.get('/admin/closures', requireAdmin, async (req, res) => {
   try {
-    const pendingReports = await getPendingClosureReports();
+    const closureReports = await getAllClosureReports();
 
-    return res.render('reports/adminClosures', {
-      title: 'Pending Closure Reports',
-      pendingReports
+    const closureReportsWithFlags = closureReports.map((report) => ({
+      ...report,
+      _id: report._id.toString(),
+      spotId: report.spotId.toString(),
+      userId: report.userId.toString(),
+      resolvedBy: report.resolvedBy ? report.resolvedBy.toString() : null,
+      isPending: report.status === "pending"
+    }));
+
+    return res.render("reports/adminClosures", {
+      title: "Admin - Closure Reports",
+      closureReports: closureReportsWithFlags
     });
   } catch (e) {
     return res.status(500).render('error', {
