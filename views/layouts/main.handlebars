@@ -12,14 +12,22 @@
     <nav>
       <a href="/spots">Study Spots</a>
       <a href="/spots/suggest">Suggest Spot</a>
+
+      {{#if userId}}
+        <a href="/sessions/manage">Study Sessions</a>
+      {{/if}}
+
       {{#if isAdmin}}
         <a href="/admin/spots">Admin Spots</a>
         <a href="/admin/spots/suggestions/review">Review Suggestions</a>
         <a href="/reports/admin/closures">Review Closure Reports</a>
       {{/if}}
+
       {{#if userId}}
         <span class="nav-user">{{username}}</span>
-        <form method="POST" action="/auth/logout" class="inline-form"><button type="submit">Log out</button></form>
+        <form method="POST" action="/auth/logout" class="inline-form">
+          <button type="submit">Log out</button>
+        </form>
       {{else}}
         <a href="/auth/login">Login</a>
         <a href="/auth/signup">Sign Up</a>

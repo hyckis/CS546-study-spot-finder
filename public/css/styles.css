@@ -8,6 +8,7 @@ a { color: #2457a6; text-decoration: none; }
 .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
 .button, button { background: #2457a6; color: white; border: 0; padding: 8px 12px; border-radius: 6px; cursor: pointer; display: inline-block; }
 .button.secondary { background: #555; }
+.button.third{ background: rgb(133, 198, 28);}
 .error { color: #b00020; font-weight: bold; }
 .spot-form, .filter-form { display: grid; gap: 12px; }
 .spot-form label { display: grid; gap: 4px; }

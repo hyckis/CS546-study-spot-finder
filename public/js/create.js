@@ -2,13 +2,12 @@ document.getElementById('createForm').addEventListener('submit', async (e) => {
   e.preventDefault();
 
   const data = {
-    creatorId: document.getElementById('creatorId').value,
-    spotId: document.getElementById('spotId').value,
-    course: document.getElementById('course').value,
-    topic: document.getElementById('topic').value,
-    sessionTime: document.getElementById('sessionTime').value,
-    groupSize: document.getElementById('groupSize').value
-  };
+  spotId: document.getElementById('spotId').value,
+  course: document.getElementById('course').value,
+  topic: document.getElementById('topic').value,
+  sessionTime: document.getElementById('sessionTime').value,
+  groupSize: document.getElementById('groupSize').value
+};
 
   const res = await fetch('/sessions/create', {
     method: 'POST',
