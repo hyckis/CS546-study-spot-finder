@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { getUserById } from "../data/users.js";
+import { spots } from "../config/mongoCollections.js";
 
 import {
   createSession,
@@ -46,7 +47,25 @@ router
       return res.redirect("/auth/login");
     }
 
-    return res.render("sessions/create");
+    try {
+      const spotCollection = await spots();
+
+      const spotList = await spotCollection
+        .find({ approved: true })
+        .project({ name: 1, address: 1 })
+        .toArray();
+
+      return res.render("sessions/create", {
+        title: "Create Study Session",
+        spots: spotList
+      });
+    } catch (e) {
+      console.log(e);
+      return res.status(500).render("error", {
+        title: "Error",
+        error: "Could not load study spots."
+      });
+    }
   })
   .post(async (req, res) => {
     if (!req.session || !req.session.userId) {

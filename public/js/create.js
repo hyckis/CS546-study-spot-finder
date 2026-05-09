@@ -1,20 +1,35 @@
-document.getElementById('createForm').addEventListener('submit', async (e) => {
+document.getElementById("createForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const data = {
-  spotId: document.getElementById('spotId').value,
-  course: document.getElementById('course').value,
-  topic: document.getElementById('topic').value,
-  sessionTime: document.getElementById('sessionTime').value,
-  groupSize: document.getElementById('groupSize').value
-};
+    spotId: document.getElementById("spotId").value.trim(),
+    course: document.getElementById("course").value.trim(),
+    topic: document.getElementById("topic").value.trim(),
+    sessionTime: document.getElementById("sessionTime").value,
+    groupSize: document.getElementById("groupSize").value
+  };
 
-  const res = await fetch('/sessions/create', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
+  if (!data.spotId) {
+    document.getElementById("createResult").innerText =
+      "Please select a study spot.";
+    return;
+  }
+
+  const res = await fetch("/sessions/create", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "same-origin",
     body: JSON.stringify(data)
   });
 
   const result = await res.json();
-  document.getElementById('createResult').innerText = JSON.stringify(result);
+
+  if (result.error) {
+    document.getElementById("createResult").innerText = result.error;
+  } else {
+    document.getElementById("createResult").innerText =
+      "Session created successfully";
+
+    document.getElementById("createForm").reset();
+  }
 });

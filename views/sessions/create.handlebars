@@ -2,17 +2,41 @@
   <h1>Create Study Session</h1>
 
   <form id="createForm">
-  <input type="text" id="spotId" placeholder="spotId"><br>
-  <input type="text" id="course" placeholder="course"><br>
-  <input type="text" id="topic" placeholder="topic"><br>
-  <input type="text" id="sessionTime" placeholder="YYYY-MM-DDTHH:mm:ss"><br>
-  <input type="number" id="groupSize" placeholder="group size"><br>
-  <button type="submit">Create</button>
-</form>
+    <label for="spotId">Study Spot:</label>
+    <select id="spotId" name="spotId">
+      <option value="">Select a study spot</option>
+      {{#each spots}}
+        <option value="{{this._id}}">
+          {{this.name}} - {{this.address}}
+        </option>
+      {{/each}}
+    </select>
+    <br>
+
+    <label for="course">Course:</label>
+    <input type="text" id="course" name="course">
+    <br>
+
+    <label for="topic">Topic:</label>
+    <input type="text" id="topic" name="topic">
+    <br>
+
+    <label for="sessionTime">Session Time:</label>
+    <input type="datetime-local" id="sessionTime" name="sessionTime">
+    <br>
+
+    <label for="groupSize">Group Size:</label>
+    <input type="number" id="groupSize" name="groupSize">
+    <br>
+
+    <button type="submit">Create</button>
+  </form>
 
   <p id="createResult"></p>
 
-  <a href="/sessions/manage">Manage my Sessions</a>
+  <p>
+    <a href="/sessions/manage">Manage My Sessions</a>
+  </p>
 
   <script src="/public/js/create.js"></script>
 </main>
