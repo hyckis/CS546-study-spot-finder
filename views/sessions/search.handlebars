@@ -1,20 +1,52 @@
 <main>
-  <h1>Search Study Sessions</h1>
+  <h1>Study Sessions</h1>
 
-  <input type="text" id="searchCourse" placeholder="course">
-  <input type="text" id="searchTopic" placeholder="topic">
-  <button onclick="searchSessions()">Search</button>
+  <input type="hidden" id="userMajor" value="{{userMajor}}">
 
-  <ul id="results"></ul>
+  <section>
+    <h2>Recommended Sessions</h2>
 
-  <h2>Join Session</h2>
-  <input type="text" id="joinSessionId" placeholder="sessionId">
-  <input type="text" id="joinUserId" placeholder="userId">
-  <button onclick="joinSession()">Join</button>
+    {{#if userMajor}}
+      <p>Recommended based on your major: {{userMajor}}</p>
+    {{else}}
+      <p>Recommended available study sessions:</p>
+    {{/if}}
 
-  <p id="joinResult"></p>
+    <ul id="recommendedResults"></ul>
+  </section>
 
-  <a href="/sessions/create">Go to Create</a>
+  <hr>
+
+  <section>
+    <h2>Search Sessions</h2>
+
+    <label for="searchCourse">Course:</label>
+    <input type="text" id="searchCourse" placeholder="course">
+
+    <label for="searchTopic">Topic:</label>
+    <input type="text" id="searchTopic" placeholder="topic">
+
+    <button onclick="searchSessions()">Search</button>
+
+    <ul id="results"></ul>
+  </section>
+
+  <hr>
+
+  <section>
+    <h2>Join by Session ID</h2>
+
+    <label for="joinSessionId">Session ID:</label>
+    <input type="text" id="joinSessionId" placeholder="sessionId">
+
+    <button onclick="joinSession()">Join</button>
+
+    <p id="joinResult"></p>
+  </section>
+
+  <p>
+    <a href="/sessions/create">Create Study Session</a>
+  </p>
 
   <script src="/public/js/search.js"></script>
 </main>
