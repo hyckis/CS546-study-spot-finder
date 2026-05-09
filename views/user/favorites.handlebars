@@ -1,0 +1,24 @@
+<div class="container">
+  <h1>My Favorite Spots</h1>
+  {{#if spots.length}}
+    <ul class="favorites-list">
+      {{#each spots}}
+        <li class="favorite-card">
+          <h2>{{this.name}}</h2>
+          <p><strong>Category:</strong> {{this.category}}</p>
+          <p><strong>Address:</strong> {{this.address}}</p>
+          <p><strong>WiFi:</strong> {{#if this.wifiAvailable}}Available{{else}}Not Available{{/if}}</p>
+          <p><strong>Outlets:</strong> {{#if this.outletsAvailable}}Available{{else}}Not Available{{/if}}</p>
+          <p><strong>Status:</strong> {{this.openStatus}}</p>
+          <p><strong>Average Rating:</strong> {{this.averageRating}}</p>
+          <a href="/spots/{{this._id}}">View Details</a>
+          <form method="POST" action="/favorites/{{this._id}}/remove">
+            <button type="submit">Remove from Favorites</button>
+          </form>
+        </li>
+      {{/each}}
+    </ul>
+  {{else}}
+    <p>You have no favorite spots yet. Browse <a href="/spots">study spots</a> to add some!</p>
+  {{/if}}
+</div>
