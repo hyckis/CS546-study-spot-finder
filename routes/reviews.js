@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { createReview, updateReview, deleteReview } from "../data/reviews.js";
+import { checkSafeString } from "../helpers.js";
 import requireAuth from "../middleware/requireAuth.js";
 
 const router = Router();
@@ -7,26 +8,20 @@ const router = Router();
 router.post("/spots/:spotId", requireAuth, async (req, res) => {
   const { spotId } = req.params;
   const { rating, comment } = req.body;  
-  try {
-    await createReview(
-      spotId,
-      req.session.userId,
-      Number(rating),
-      comment
-    );
 
-    return res.redirect(`/spots/${spotId}?success=review`);
-  } catch (err) {
+  if (!rating || isNaN(Number(rating))) {
     return res.status(400).render("error", {
       title: "Review Error",
-      error: err.message || err
+      error: "Invalid rating."
     });
   }
-});
+  if (!comment || typeof comment !== "string" || !checkSafeString(comment, "Comment")) {
+    return res.status(400).render("error", {
+      title: "Review Error",
+      error: "Comment cannot be empty."
+    });
+  }
 
-router.post("/spots/:spotId", requireAuth, async(req, res) => {
-  const {spotId} = req.params;
-  const {rating, comment} = req.body;
   try {
     await createReview(
       spotId,
@@ -34,7 +29,9 @@ router.post("/spots/:spotId", requireAuth, async(req, res) => {
       Number(rating),
       comment
     );
+
     return res.redirect(`/spots/${spotId}?success=review`);
+
   } catch (err) {
     return res.status(400).render("error", {
       title: "Review Error",

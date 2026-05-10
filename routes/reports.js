@@ -134,53 +134,5 @@ router.post('/admin/closures/:reportId/resolve', requireAdmin, async (req, res) 
   }
 });
 
-router.post("/spots/:spotId/closure", requireLogin, async (req, res) => {
-  try {
-    const { spotId } = req.params;
-    const userId = req.session.userId;
-
-    await createClosureReport(spotId, userId);
-
-    return res.redirect(`/spots/${spotId}`);
-  } catch (e) {
-    return res.status(400).render("error", {
-      title: "Closure Report Error",
-      error: e.message || e
-    });
-  }
-});
-
-router.get("/admin/closures", requireAdmin, async (req, res) => {
-  try {
-    const pendingReports = await getPendingClosureReports();
-
-    return res.render("reports/adminClosures", {
-      title: "Pending Closure Reports",
-      pendingReports
-    });
-  } catch (e) {
-    return res.status(500).render("error", {
-      title: "Admin Report Error",
-      error: e.message || e
-    });
-  }
-});
-
-router.post("/admin/closures/:reportId/resolve", requireAdmin, async (req, res) => {
-  try {
-    const { reportId } = req.params;
-    const { status } = req.body;
-    const adminId = req.session.userId;
-
-    await resolveClosureReport(reportId, adminId, status);
-
-    return res.redirect("/reports/admin/closures");
-  } catch (e) {
-    return res.status(400).render("error", {
-      title: "Resolve Report Error",
-      error: e.message || e
-    });
-  }
-});
 
 export default router;

@@ -15,6 +15,26 @@ document.getElementById("createForm").addEventListener("submit", async (e) => {
     return;
   }
 
+  if (!course || !course.trim()) {
+    errorDiv.textContent = "Course is required.";
+    return;
+  }
+
+  if (!topic || !topic.trim()) {
+    errorDiv.textContent = "Topic is required.";
+    return;
+  }
+
+  if (!sessionTime) {
+    errorDiv.textContent = "Session time is required.";
+    return;
+  }
+
+  if (!groupSize || isNaN(Number(groupSize)) || Number(groupSize) < 1) {
+    errorDiv.textContent = "Group size must be at least 1.";
+    return;
+  }
+
   const res = await fetch("/sessions/create", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
