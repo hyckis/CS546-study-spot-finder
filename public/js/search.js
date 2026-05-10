@@ -2,39 +2,6 @@ window.addEventListener("DOMContentLoaded", async () => {
   await loadRecommendedSessions();
 });
 
-function createSessionListItem(s) {
-  const li = document.createElement("li");
-  const course = document.createElement("strong");
-  course.textContent = s.course;
-
-  li.appendChild(course);
-  li.appendChild(document.createTextNode(` - ${s.topic}`));
-  li.appendChild(document.createElement("br"));
-  li.appendChild(document.createTextNode(`Session ID: ${s._id}`));
-  li.appendChild(document.createElement("br"));
-  li.appendChild(document.createTextNode(`Spot ID: ${s.spotId}`));
-  li.appendChild(document.createElement("br"));
-  li.appendChild(document.createTextNode(
-      `Time: ${new Date(s.sessionTime).toLocaleString()}`
-  ));
-  li.appendChild(document.createElement("br"));
-  li.appendChild(document.createTextNode(
-      `Members: ${s.approvedMemberIds.length}/${s.groupSize}`
-  ));
-  li.appendChild(document.createElement("br"));
-  li.appendChild(document.createTextNode(`Status: ${s.status}`));
-  li.appendChild(document.createElement("br"));
-
-  const joinBtn = document.createElement("button");
-  joinBtn.textContent = "Join This Session";
-  joinBtn.addEventListener("click", () => {
-    joinSessionById(s._id);
-  });
-  li.appendChild(joinBtn);
-
-  return li;
-}
-
 async function loadRecommendedSessions() {
   const userMajorInput = document.getElementById("userMajor");
   const userMajor = userMajorInput ? userMajorInput.value.trim() : "";
@@ -64,7 +31,19 @@ async function loadRecommendedSessions() {
   }
 
   data.forEach((s) => {
-    list.appendChild(createSessionListItem(s));
+    const li = document.createElement("li");
+
+    li.innerHTML = `
+      <strong>${s.course}</strong> - ${s.topic}<br>
+      Session ID: ${s._id}<br>
+      Spot ID: ${s.spotId}<br>
+      Time: ${new Date(s.sessionTime).toLocaleString()}<br>
+      Members: ${s.approvedMemberIds.length}/${s.groupSize}<br>
+      Status: ${s.status}<br>
+      <button onclick="joinSessionById('${s._id}')">Join This Session</button>
+    `;
+
+    list.appendChild(li);
   });
 }
 
@@ -101,7 +80,19 @@ async function searchSessions() {
   }
 
   data.forEach((s) => {
-    list.appendChild(createSessionListItem(s));
+    const li = document.createElement("li");
+
+    li.innerHTML = `
+      <strong>${s.course}</strong> - ${s.topic}<br>
+      Session ID: ${s._id}<br>
+      Spot ID: ${s.spotId}<br>
+      Time: ${new Date(s.sessionTime).toLocaleString()}<br>
+      Members: ${s.approvedMemberIds.length}/${s.groupSize}<br>
+      Status: ${s.status}<br>
+      <button onclick="joinSessionById('${s._id}')">Join This Session</button>
+    `;
+
+    list.appendChild(li);
   });
 }
 
