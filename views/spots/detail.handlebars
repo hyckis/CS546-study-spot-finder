@@ -11,6 +11,19 @@
   <p><strong>Coordinates:</strong> {{spot.coordinates.latitude}}, {{spot.coordinates.longitude}}</p>
 </article>
 
+{{#if currentUserId}}
+  {{#if isFavorited}}
+    <form method="POST" action="/favorites/{{spot._id}}/remove">
+      <button type="submit">Remove from Favorites</button>
+    </form>
+  {{else}}
+    <form method="POST" action="/favorites">
+      <input type="hidden" name="spotId" value="{{spot._id}}">
+      <button type="submit">Add to Favorites</button>
+    </form>
+  {{/if}}
+{{/if}}
+
 <section class="card map-card">
   <h3>Map View</h3>
   {{#if mapEmbedUrl}}
@@ -26,7 +39,6 @@
   {{/if}}
 </section>
 
-
 {{#if isAdmin}}
   <p>
     <a class="button" href="/admin/spots/{{spot._id}}/edit">Edit This Spot</a>
@@ -35,7 +47,6 @@
 
 <section class="card">
   <h3>Current Study Conditions</h3>
-
   {{#if reportSummary}}
     <p><strong>Reports Count:</strong> {{reportSummary.reportCount}}</p>
     <p><strong>WiFi:</strong> {{reportSummary.wifiStatus}}</p>
@@ -48,7 +59,6 @@
 
 <section class="card">
   <h3>Submit Real-Time Report</h3>
-
   <form method="POST" action="/reports/spots/{{spot._id}}/status">
     <label>
       WiFi
@@ -58,7 +68,6 @@
         <option value="Slow">Slow</option>
       </select>
     </label>
-
     <label>
       Outlets
       <select name="socketStatus" required>
@@ -67,7 +76,6 @@
         <option value="Full">Full</option>
       </select>
     </label>
-
     <label>
       Crowdedness
       <select name="crowdednessStatus" required>
@@ -77,14 +85,12 @@
         <option value="Full">Full</option>
       </select>
     </label>
-
     <button type="submit">Submit Report</button>
   </form>
 </section>
 
 <section class="card">
   <h3>Recent Reports</h3>
-
   {{#if hasActiveReports}}
     <ul>
       {{#each activeReports}}
@@ -104,7 +110,6 @@
 <section class="card">
   <h3>Report Spot Closure</h3>
   <p>If this study spot is closed or unavailable, submit a closure report for admin review.</p>
-
   <form method="POST" action="/reports/spots/{{spot._id}}/closure">
     <button type="submit">Report as Closed</button>
   </form>
@@ -117,10 +122,8 @@
 {{/if}}
 {{/unless}}
 
-
 <section class="card">
   <h3>Leave a Review</h3>
-
   <form method="POST" action="/reviews/spots/{{spot._id}}">
     <label>
       Rating
@@ -132,24 +135,21 @@
         <option value="1">1</option>
       </select>
     </label>
-
     <label>
       Comment
       <textarea name="comment" required></textarea>
     </label>
-
     <button type="submit">Submit Review</button>
   </form>
 </section>
 
 <section class="card">
   <h3>Reviews</h3>
-
   {{#if hasReviews}}
     <ul>
       {{#each reviews}}
         <li>
-          ☆ {{rating}} — {{comment}} 
+          ☆ {{rating}} — {{comment}}
           <strong>By:</strong> {{username}}
           {{#if isOwner}}
             <form method="POST" action="/reviews/{{_id}}/update">
@@ -163,15 +163,12 @@
                   <option value="1">1</option>
                 </select>
               </label>
-
               <label>
                 Comment
                 <textarea name="comment" required>{{comment}}</textarea>
               </label>
-
               <button type="submit">Update Review</button>
             </form>
-
             <form method="POST" action="/reviews/{{_id}}/delete">
               <button type="submit">Delete Review</button>
             </form>

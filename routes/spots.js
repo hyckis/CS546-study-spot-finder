@@ -19,6 +19,7 @@ import {
   getSpotSuggestionById
 } from "../data/spotSuggestions.js";
 
+import { isFavorited } from "../data/favorites.js";
 import requireAuth from "../middleware/requireAuth.js";
 
 const router = Router();
@@ -193,6 +194,10 @@ router.get("/:id", async (req, res) => {
       isOwner: req.session.userId === review.userId
     }));
 
+    const alreadyFavorited = req.session.userId
+      ? await isFavorited(req.session.userId, req.params.id)
+      : false;
+
     res.render("spots/detail", {
       title: spot.name,
       spot,
@@ -211,7 +216,8 @@ router.get("/:id", async (req, res) => {
       reviewSuccess: req.query.success === "review",
       reviewUpdated: req.query.success === "reviewUpdated",
       reviewDeleted: req.query.success === "reviewDeleted",
-      isClosed: spot.openStatus === "Closed"
+      isClosed: spot.openStatus === "Closed",
+      isFavorited: alreadyFavorited
     });
   } catch (err) {
     res.status(400).render("error", {

@@ -11,14 +11,9 @@ const checkId = (id, name) => {
 export const addFavorite = async (userId, spotId) => {
   userId = checkId(userId, "userId");
   spotId = checkId(spotId, "spotId");
-
   const favoriteCollection = await favorites();
-
   await favoriteCollection.updateOne(
-    {
-      userId: new ObjectId(userId),
-      spotId: new ObjectId(spotId)
-    },
+    { userId: new ObjectId(userId), spotId: new ObjectId(spotId) },
     {
       $setOnInsert: {
         userId: new ObjectId(userId),
@@ -28,39 +23,45 @@ export const addFavorite = async (userId, spotId) => {
     },
     { upsert: true }
   );
-
   return true;
 };
 
 export const removeFavorite = async (userId, spotId) => {
   userId = checkId(userId, "userId");
   spotId = checkId(spotId, "spotId");
-
   const favoriteCollection = await favorites();
-
   await favoriteCollection.deleteOne({
     userId: new ObjectId(userId),
     spotId: new ObjectId(spotId)
   });
-
   return true;
 };
 
 export const getFavoritesByUserId = async (userId) => {
   userId = checkId(userId, "userId");
-
   const favoriteCollection = await favorites();
   const spotCollection = await spots();
-
   const favs = await favoriteCollection
     .find({ userId: new ObjectId(userId) })
     .toArray();
-
   const spotIds = favs.map((fav) => fav.spotId);
-
   if (spotIds.length === 0) return [];
-
   return await spotCollection
     .find({ _id: { $in: spotIds } })
     .toArray();
+};
+/**
+ * Use this in spot detail routes to check if the current user
+ * has already favorited a spot, then pass the result to the
+ * view to toggle the Add/Remove button.
+ */
+export const isFavorited = async (userId, spotId) => {
+  userId = checkId(userId, "userId");
+  spotId = checkId(spotId, "spotId");
+  const favoriteCollection = await favorites();
+  const existing = await favoriteCollection.findOne({
+    userId: new ObjectId(userId),
+    spotId: new ObjectId(spotId)
+  });
+  return !!existing;
 };
