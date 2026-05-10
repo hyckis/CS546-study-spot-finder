@@ -1,9 +1,24 @@
 <div class="card">
   <h2>{{user.username}}'s Profile</h2>
-
   <p><strong>Email:</strong> {{user.email}}</p>
   <p><strong>Name:</strong> {{user.firstName}} {{user.lastName}}</p>
   <p><strong>Major:</strong> {{user.major}}</p>
+
+  <h3>Favorite Spots</h3>
+  {{#if favorites.length}}
+    <ul>
+      {{#each favorites}}
+        <li>
+          <a href="/spots/{{this._id}}">{{this.name}}</a> — {{this.boroughOrCity}}, {{this.state}}
+          <form method="POST" action="/favorites/{{this._id}}/remove">
+            <button type="submit">Remove</button>
+          </form>
+        </li>
+      {{/each}}
+    </ul>
+  {{else}}
+    <p>No favorite spots yet.</p>
+  {{/if}}
 
   {{#if isOwner}}
     <h3>Edit Profile</h3>
@@ -12,13 +27,24 @@
         Username
         <input type="text" name="username" value="{{user.username}}" required>
       </label>
-
       <label>
         Email
         <input type="email" name="email" value="{{user.email}}" required>
       </label>
-
       <button type="submit">Update Profile</button>
+    </form>
+
+    <h3>Change Password</h3>
+    <form method="POST" action="/users/{{user._id}}/password">
+      <label>
+        Current Password
+        <input type="password" name="currentPassword" required>
+      </label>
+      <label>
+        New Password
+        <input type="password" name="newPassword" required>
+      </label>
+      <button type="submit">Change Password</button>
     </form>
 
     <form method="POST" action="/users/{{user._id}}/delete">
