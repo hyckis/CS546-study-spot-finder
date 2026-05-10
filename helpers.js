@@ -15,12 +15,3 @@ export const checkReportId = (id, name) => {
   return trimmed;
 };
 
-export const checkSafeString = (str, name) => {
-  if (!str || typeof str !== "string") throw `${name} must be a string`;
-  const trimmed = str.trim();
-  if (!trimmed) throw `${name} cannot be empty`;
-  if (trimmed.includes("<") || trimmed.includes(">") || trimmed.includes("script")) 
-    throw `${name} contains invalid characters`;
-  return trimmed;
-};
-
