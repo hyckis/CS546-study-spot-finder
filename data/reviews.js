@@ -19,8 +19,8 @@ const updateAvgRating = async(spotId) => {
     }).toArray();
     
     let avg = 0;
-    if (!allReviews.length !== 0) 
-        avg = allReviews.reduce((sum, r) => sum + Number(r.rating), 0) / allReviews.length;
+    if (allReviews.length === 0) avg = 0;
+    else avg = allReviews.reduce((sum, r) => sum + Number(r.rating), 0) / allReviews.length;
 
     await spotCollection.updateOne(
         { _id: new ObjectId(spotId) },
